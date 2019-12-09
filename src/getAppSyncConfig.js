@@ -22,6 +22,16 @@ export default function getAppSyncConfig(context, appSyncConfig) {
       type: source.type,
     };
 
+    /**
+     * Returns the tableName resolving reference
+     */
+    const getTableName = (table) => {
+      if (table && table.Ref) {
+        return get(context.serverless.service, `resources.Resources.${table.Ref}.Properties.TableName`);
+      }
+      return table;
+    };
+
     switch (source.type) {
       case 'AMAZON_DYNAMODB': {
         const { port } = context.options.dynamoDb;
@@ -30,7 +40,7 @@ export default function getAppSyncConfig(context, appSyncConfig) {
           config: {
             endpoint: `http://localhost:${port}`,
             region: 'localhost',
-            tableName: source.config.tableName, // FIXME: Handle Ref:
+            tableName: getTableName(source.config.tableName),
           },
         };
       }
