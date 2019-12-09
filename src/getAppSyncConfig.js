@@ -58,12 +58,20 @@ export default function getAppSyncConfig(context, appSyncConfig) {
   };
 
   const makeResolver = (resolver) => ({
-    kind: 'UNIT',
+    kind: resolver.kind || 'UNIT',
     fieldName: resolver.field,
     typeName: resolver.type,
     dataSourceName: resolver.dataSource,
+    functions: resolver.functions,
     requestMappingTemplateLocation: resolver.request,
     responseMappingTemplateLocation: resolver.response,
+  });
+
+  const makeFunctionConfiguration = (functionConfiguration) => ({
+    dataSourceName: functionConfiguration.dataSource,
+    name: functionConfiguration.name,
+    requestMappingTemplateLocation: functionConfiguration.request,
+    responseMappingTemplateLocation: functionConfiguration.response,
   });
 
   const makeAuthType = (authType) => {
@@ -103,6 +111,7 @@ export default function getAppSyncConfig(context, appSyncConfig) {
     schema: getFileMap(context.serverless.config.servicePath, appSyncConfig.schema || 'schema.graphql'),
     resolvers: appSyncConfig.mappingTemplates.flat().map(makeResolver),
     dataSources: appSyncConfig.dataSources.flat().map(makeDataSource).filter((v) => v !== null),
+    functions: appSyncConfig.functionConfigurations.flat().map(makeFunctionConfiguration),
     mappingTemplates: appSyncConfig.mappingTemplates.flat().reduce((acc, template) => {
       const requestTemplate = template.request || `${template.type}.${template.field}.request.vtl`;
       if (!find(acc, (e) => e.path === requestTemplate)) {
