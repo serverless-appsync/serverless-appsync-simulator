@@ -24,13 +24,20 @@ export default function getAppSyncConfig(context, appSyncConfig) {
 
     switch (source.type) {
       case 'AMAZON_DYNAMODB': {
-        const { port } = context.options.dynamoDb;
+        const {
+          endpoint,
+          accessKeyId,
+          secretAccessKey,
+        } = context.options.dynamoDb;
+
         return {
           ...dataSource,
           config: {
-            endpoint: `http://localhost:${port}`,
+            endpoint,
             region: 'localhost',
             tableName: source.config.tableName, // FIXME: Handle Ref:
+            accessKeyId,
+            secretAccessKey,
           },
         };
       }

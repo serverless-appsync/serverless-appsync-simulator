@@ -19,7 +19,9 @@ class ServerlessAppSyncSimulator {
         wsPort: 20003,
         location: '.',
         dynamoDb: {
-          port: get(this.serverless.service, 'custom.dynamodb.start.port', 8000),
+          endpoint: `http://localhost:${get(this.serverless.service, 'custom.dynamodb.start.port', 8000)}`,
+          accessKeyId: 'DEFAULT_ACCESS_KEY',
+          secretAccessKey: 'DEFAULT_SECRET',
         },
       },
       get(this.serverless.service, 'custom.appsync-simulator', {}),
