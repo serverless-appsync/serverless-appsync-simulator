@@ -7,11 +7,13 @@ import { find, get } from 'lodash';
 import path from 'path';
 
 export default function getAppSyncConfig(context, appSyncConfig) {
-  const cfg = appSyncConfig;
   // Flattening params
-  cfg.mappingTemplates = cfg.mappingTemplates.flat();
-  cfg.functionConfigurations = cfg.functionConfigurations.flat();
-  cfg.dataSources = cfg.dataSources.flat();
+  const cfg = {
+    ...appSyncConfig,
+    mappingTemplates: (appSyncConfig.mappingTemplates || []).flat(),
+    functionConfigurations: (appSyncConfig.functionConfigurations || []).flat(),
+    dataSources: (appSyncConfig.dataSources || []).flat(),
+  };
 
   const getFileMap = (basePath, filePath) => ({
     path: filePath,
