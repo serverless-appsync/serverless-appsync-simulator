@@ -31,6 +31,8 @@ export default function getAppSyncConfig(context, appSyncConfig) {
             endpoint: `http://localhost:${port}`,
             region: 'localhost',
             tableName: source.config.tableName, // FIXME: Handle Ref:
+            accessKeyId: 'DEFAULT_ACCESS_KEY', // with this there's no need of having credentials configured
+            secretAccessKey: 'DEFAULT_SECRET', // with this there's no need of having credentials configured
           },
         };
       }
