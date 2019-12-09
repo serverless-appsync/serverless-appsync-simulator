@@ -29,11 +29,17 @@ export default function getAppSyncConfig(context, appSyncConfig) {
     };
 
     /**
-     * Returns the tableName resolving reference
+     * Returns the tableName resolving reference. Throws exception if reference is not found
      */
     const getTableName = (table) => {
       if (table && table.Ref) {
-        return get(context.serverless.service, `resources.Resources.${table.Ref}.Properties.TableName`);
+        const tableName = get(context.serverless.service, `resources.Resources.${table.Ref}.Properties.TableName`);
+
+        if (!tableName) {
+          throw new Error(`Unable to find table Reference for ${table} inside Serverless resources`);
+        }
+
+        return tableName;
       }
       return table;
     };
