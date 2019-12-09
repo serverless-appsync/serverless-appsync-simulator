@@ -3,10 +3,16 @@ import {
 } from 'amplify-appsync-simulator';
 import { invoke } from 'amplify-util-mock/lib/utils/lambda/invoke';
 import fs from 'fs';
-import { find } from 'lodash';
+import { find, get } from 'lodash';
 import path from 'path';
 
 export default function getAppSyncConfig(context, appSyncConfig) {
+  const cfg = appSyncConfig;
+  // Flattening params
+  cfg.mappingTemplates = cfg.mappingTemplates.flat();
+  cfg.functionConfigurations = cfg.functionConfigurations.flat();
+  cfg.dataSources = cfg.dataSources.flat();
+
   const getFileMap = (basePath, filePath) => ({
     path: filePath,
     content: fs.readFileSync(path.join(basePath, filePath), { encoding: 'utf8' }),
@@ -103,26 +109,26 @@ export default function getAppSyncConfig(context, appSyncConfig) {
     return auth;
   };
 
-  const makeAppSync = () => ({
-    name: appSyncConfig.name,
+  const makeAppSync = (config) => ({
+    name: config.name,
     apiKey: context.options.apiKey,
-    defaultAuthenticationType: makeAuthType(appSyncConfig),
-    additionalAuthenticationProviders: (appSyncConfig.additionalAuthenticationProviders || [])
+    defaultAuthenticationType: makeAuthType(config),
+    additionalAuthenticationProviders: (config.additionalAuthenticationProviders || [])
       .map(makeAuthType),
   });
 
   const mappingTemplatesLocation = path.join(
     context.serverless.config.servicePath,
-    appSyncConfig.mappingTemplatesLocation || 'mapping-templates',
+    cfg.mappingTemplatesLocation || 'mapping-templates',
   );
 
-  return {
-    appSync: makeAppSync(),
-    schema: getFileMap(context.serverless.config.servicePath, appSyncConfig.schema || 'schema.graphql'),
-    resolvers: appSyncConfig.mappingTemplates.flat().map(makeResolver),
-    dataSources: appSyncConfig.dataSources.flat().map(makeDataSource).filter((v) => v !== null),
-    functions: appSyncConfig.functionConfigurations.flat().map(makeFunctionConfiguration),
-    mappingTemplates: appSyncConfig.mappingTemplates.flat().reduce((acc, template) => {
+  const makeMappingTemplates = (config) => {
+    const sources = [].concat(
+      config.mappingTemplates,
+      config.functionConfigurations,
+    );
+
+    return sources.reduce((acc, template) => {
       const requestTemplate = template.request || `${template.type}.${template.field}.request.vtl`;
       if (!find(acc, (e) => e.path === requestTemplate)) {
         acc.push(getFileMap(mappingTemplatesLocation, requestTemplate));
@@ -133,6 +139,15 @@ export default function getAppSyncConfig(context, appSyncConfig) {
       }
 
       return acc;
-    }, []),
+    }, []);
+  };
+
+  return {
+    appSync: makeAppSync(cfg),
+    schema: getFileMap(context.serverless.config.servicePath, cfg.schema || 'schema.graphql'),
+    resolvers: cfg.mappingTemplates.map(makeResolver),
+    dataSources: cfg.dataSources.map(makeDataSource).filter((v) => v !== null),
+    functions: cfg.functionConfigurations.map(makeFunctionConfiguration),
+    mappingTemplates: makeMappingTemplates(cfg),
   };
 }
