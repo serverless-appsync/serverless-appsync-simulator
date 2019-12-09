@@ -101,9 +101,9 @@ export default function getAppSyncConfig(context, appSyncConfig) {
   return {
     appSync: makeAppSync(),
     schema: getFileMap(context.serverless.config.servicePath, appSyncConfig.schema || 'schema.graphql'),
-    resolvers: appSyncConfig.mappingTemplates.map(makeResolver),
-    dataSources: appSyncConfig.dataSources.map(makeDataSource).filter((v) => v !== null),
-    mappingTemplates: appSyncConfig.mappingTemplates.reduce((acc, template) => {
+    resolvers: appSyncConfig.mappingTemplates.flat().map(makeResolver),
+    dataSources: appSyncConfig.dataSources.flat().map(makeDataSource).filter((v) => v !== null),
+    mappingTemplates: appSyncConfig.mappingTemplates.flat().reduce((acc, template) => {
       const requestTemplate = template.request || `${template.type}.${template.field}.request.vtl`;
       if (!find(acc, (e) => e.path === requestTemplate)) {
         acc.push(getFileMap(mappingTemplatesLocation, requestTemplate));
