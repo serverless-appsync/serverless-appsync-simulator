@@ -53,6 +53,7 @@ Put options under `custom.appsync-simulator` in your `serverless.yml` file
 | wsPort                   | 20003                 | AppSync subscriptions port                                                                                                     |
 | location                 | . (base directory)    | Location of the lambda functions handlers.                                                                                     |
 | dynamoDb.endpoint        | http://localhost:8000 | Dynamodb endpoint. Specify it if you're not using serverless-dynamodb-local. Otherwise, port is taken from dynamodb-local conf |
+| dynamoDb.region          | localhost             | Dynamodb region. Specify it if you're connecting to a remote Dynamodb intance.                                                 |
 | dynamoDb.accessKeyId     | DEFAULT_ACCESS_KEY    | AWS Access Key ID to access DynamoDB                                                                                           |
 | dynamoDb.secretAccessKey | DEFAULT_SECRET        | AWS Secret Key to access DynamoDB                                                                                              |
 Example:

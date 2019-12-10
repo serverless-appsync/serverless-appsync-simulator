@@ -26,6 +26,7 @@ export default function getAppSyncConfig(context, appSyncConfig) {
       case 'AMAZON_DYNAMODB': {
         const {
           endpoint,
+          region,
           accessKeyId,
           secretAccessKey,
         } = context.options.dynamoDb;
@@ -34,7 +35,7 @@ export default function getAppSyncConfig(context, appSyncConfig) {
           ...dataSource,
           config: {
             endpoint,
-            region: 'localhost',
+            region,
             tableName: source.config.tableName, // FIXME: Handle Ref:
             accessKeyId,
             secretAccessKey,
