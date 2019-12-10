@@ -63,7 +63,7 @@ custom:
   appsync-simulator:
     location: '.webpack/service' # use webpack build directory
     dynamoDb:
-      endpoint: 'http://my-custom-dynamo:8000
+      endpoint: 'http://my-custom-dynamo:8000'
 
 ````
 
