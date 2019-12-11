@@ -3,8 +3,9 @@ import {
 } from 'amplify-appsync-simulator';
 import { invoke } from 'amplify-util-mock/lib/utils/lambda/invoke';
 import fs from 'fs';
-import { find, get } from 'lodash';
+import { find, get, reduce } from 'lodash';
 import path from 'path';
+import NodeEvaulator from 'cfn-resolver-lib';
 
 export default function getAppSyncConfig(context, appSyncConfig) {
   // Flattening params
@@ -31,19 +32,54 @@ export default function getAppSyncConfig(context, appSyncConfig) {
     };
 
     /**
-     * Returns the tableName resolving reference. Throws exception if reference is not found
+     * Resolves a resourse through `Ref:` or `Fn:GetAtt`
      */
-    const getTableName = (table) => {
-      if (table && table.Ref) {
-        const tableName = get(context.serverless.service, `resources.Resources.${table.Ref}.Properties.TableName`);
-
-        if (!tableName) {
-          throw new Error(`Unable to find table Reference for ${table} inside Serverless resources`);
-        }
-
-        return tableName;
+    // FIXME: instead of this we should parse the whole YML file
+    // and resolve ALL possible values everywhere:
+    // e.g.:  environment variables.
+    const resolveResource = (resource) => {
+      if (typeof resource === 'string') {
+        return resource;
       }
-      return table;
+
+      const refResolvers = reduce(
+        get(context.serverless.service, 'resources.Resources', {}),
+        (acc, res, name) => {
+          let refPath;
+          if (res.Type === 'AWS::DynamoDB::Table') {
+            refPath = 'Properties.TableName';
+          }
+
+          return { ...acc, [name]: get(res, refPath, null) };
+        },
+        {},
+      );
+
+      const evaluator = new NodeEvaulator(
+        { resource },
+        {
+          RefResolveres: refResolvers,
+          'Fn::GetAttResolvers': context.options.getAttResolver,
+        },
+        process.env.SLS_DEBUG,
+      );
+      const resolved = evaluator.evaulateNodes();
+
+      if (resolved && resolved.resource) {
+        if (process.env.SLS_DEBUG) {
+          context.serverless.cli.log(
+            `Resolved resource for ${JSON.stringify(resource)}: `
+            + `${resolved.resource}`,
+          );
+        }
+        return resolved.resource;
+      }
+
+      if (process.env.SLS_DEBUG) {
+        context.serverless.cli.log(`Could not resolve ${JSON.stringify(resource)}`);
+      }
+
+      return null;
     };
 
     switch (source.type) {
@@ -62,7 +98,7 @@ export default function getAppSyncConfig(context, appSyncConfig) {
             region,
             accessKeyId,
             secretAccessKey,
-            tableName: getTableName(source.config.tableName),
+            tableName: resolveResource(source.config.tableName),
           },
         };
       }
@@ -82,6 +118,13 @@ export default function getAppSyncConfig(context, appSyncConfig) {
             event: payload,
             environment: context.serverless.service.provider.environment || {},
           }),
+        };
+      }
+      case 'AMAZON_ELASTICSEARCH':
+      case 'HTTP': {
+        return {
+          ...dataSource,
+          endpoint: resolveResource(source.config.endpoint),
         };
       }
       default:

@@ -7,6 +7,8 @@ import { get, merge } from 'lodash';
 import getAppSyncConfig from './getAppSyncConfig';
 import LambdaDataLoader from './data-loaders/LambdaDataLoader';
 import NotImplementedDataLoader from './data-loaders/NotImplementedDataLoader';
+import ElasticDataLoader from './data-loaders/ElasticDataLoader';
+import HttpDataLoader from './data-loaders/HttpDataLoader';
 
 class ServerlessAppSyncSimulator {
   constructor(serverless) {
@@ -18,6 +20,7 @@ class ServerlessAppSyncSimulator {
         port: 20002,
         wsPort: 20003,
         location: '.',
+        getAttResolver: {},
         dynamoDb: {
           endpoint: `http://localhost:${get(this.serverless.service, 'custom.dynamodb.start.port', 8000)}`,
           region: 'localhost',
@@ -32,9 +35,9 @@ class ServerlessAppSyncSimulator {
     // Hack: appsync-cli-simulator does not support BatchInvoke.
     removeDataLoader('AWS_LAMBDA');
     addDataLoader('AWS_LAMBDA', LambdaDataLoader);
-    addDataLoader('HTTP', NotImplementedDataLoader);
+    addDataLoader('HTTP', HttpDataLoader);
+    addDataLoader('AMAZON_ELASTICSEARCH', ElasticDataLoader);
     addDataLoader('RELATIONAL_DATABASE', NotImplementedDataLoader);
-    addDataLoader('AMAZON_ELASTICSEARCH', NotImplementedDataLoader);
 
     this.hooks = {
       'before:offline:start:init': this.startServer.bind(this),
