@@ -3,12 +3,18 @@ import {
   addDataLoader,
   removeDataLoader,
 } from 'amplify-appsync-simulator';
-import { get, merge } from 'lodash';
+import { get, merge, reduce } from 'lodash';
+import NodeEvaluator from 'cfn-resolver-lib';
 import getAppSyncConfig from './getAppSyncConfig';
 import LambdaDataLoader from './data-loaders/LambdaDataLoader';
 import NotImplementedDataLoader from './data-loaders/NotImplementedDataLoader';
 import ElasticDataLoader from './data-loaders/ElasticDataLoader';
 import HttpDataLoader from './data-loaders/HttpDataLoader';
+
+const resolverPathMap = {
+  'AWS::DynamoDB::Table': 'Properties.TableName',
+  'AWS::S3::Bucket': 'Properties.BucketName',
+};
 
 class ServerlessAppSyncSimulator {
   constructor(serverless) {
@@ -20,7 +26,8 @@ class ServerlessAppSyncSimulator {
         port: 20002,
         wsPort: 20003,
         location: '.',
-        getAttResolver: {},
+        refMap: {},
+        getAttMap: {},
         dynamoDb: {
           endpoint: `http://localhost:${get(this.serverless.service, 'custom.dynamodb.start.port', 8000)}`,
           region: 'localhost',
@@ -47,6 +54,17 @@ class ServerlessAppSyncSimulator {
 
   async startServer() {
     try {
+      this.buildResourceResolvers();
+      this.serverless.service.functions = this.resolveResources(
+        this.serverless.service.functions,
+      );
+      this.serverless.service.provider.environment = this.resolveResources(
+        this.serverless.service.provider.environment,
+      );
+      this.serverless.service.custom.appSync = this.resolveResources(
+        this.serverless.service.custom.appSync,
+      );
+
       this.simulator = new AmplifyAppSyncSimulator({
         port: this.options.port,
         wsPort: this.options.wsPort,
@@ -81,6 +99,38 @@ class ServerlessAppSyncSimulator {
   endServer() {
     this.serverlessLog('Halting AppSync Simulator');
     this.simulator.stop();
+  }
+
+  buildResourceResolvers() {
+    const refResolvers = reduce(
+      get(this.serverless.service, 'resources.Resources', {}),
+      (acc, res, name) => {
+        const path = resolverPathMap[res.Type];
+        if (path !== undefined) {
+          return { ...acc, [name]: get(res, path, null) };
+        }
+
+        return acc;
+      },
+      {},
+    );
+
+    this.resourceResolvers = {
+      RefResolvers: { ...refResolvers, ...this.options.refMap },
+      'Fn::GetAttResolvers': this.options.getAttMap,
+    };
+  }
+
+  /**
+   * Resolves resourses through `Ref:` or `Fn:GetAtt`
+   */
+  resolveResources(input) {
+    const evaluator = new NodeEvaluator(
+      input,
+      this.resourceResolvers,
+      process.env.SLS_DEBUG,
+    );
+    return evaluator.evaluateNodes();
   }
 }
 

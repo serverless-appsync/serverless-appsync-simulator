@@ -3,9 +3,8 @@ import {
 } from 'amplify-appsync-simulator';
 import { invoke } from 'amplify-util-mock/lib/utils/lambda/invoke';
 import fs from 'fs';
-import { find, get, reduce } from 'lodash';
+import { find } from 'lodash';
 import path from 'path';
-import NodeEvaulator from 'cfn-resolver-lib';
 
 export default function getAppSyncConfig(context, appSyncConfig) {
   // Flattening params
@@ -31,57 +30,6 @@ export default function getAppSyncConfig(context, appSyncConfig) {
       type: source.type,
     };
 
-    /**
-     * Resolves a resourse through `Ref:` or `Fn:GetAtt`
-     */
-    // FIXME: instead of this we should parse the whole YML file
-    // and resolve ALL possible values everywhere:
-    // e.g.:  environment variables.
-    const resolveResource = (resource) => {
-      if (typeof resource === 'string') {
-        return resource;
-      }
-
-      const refResolvers = reduce(
-        get(context.serverless.service, 'resources.Resources', {}),
-        (acc, res, name) => {
-          let refPath;
-          if (res.Type === 'AWS::DynamoDB::Table') {
-            refPath = 'Properties.TableName';
-          }
-
-          return { ...acc, [name]: get(res, refPath, null) };
-        },
-        {},
-      );
-
-      const evaluator = new NodeEvaulator(
-        { resource },
-        {
-          RefResolveres: refResolvers,
-          'Fn::GetAttResolvers': context.options.getAttResolver,
-        },
-        process.env.SLS_DEBUG,
-      );
-      const resolved = evaluator.evaulateNodes();
-
-      if (resolved && resolved.resource) {
-        if (process.env.SLS_DEBUG) {
-          context.serverless.cli.log(
-            `Resolved resource for ${JSON.stringify(resource)}: `
-            + `${resolved.resource}`,
-          );
-        }
-        return resolved.resource;
-      }
-
-      if (process.env.SLS_DEBUG) {
-        context.serverless.cli.log(`Could not resolve ${JSON.stringify(resource)}`);
-      }
-
-      return null;
-    };
-
     switch (source.type) {
       case 'AMAZON_DYNAMODB': {
         const {
@@ -98,7 +46,7 @@ export default function getAppSyncConfig(context, appSyncConfig) {
             region,
             accessKeyId,
             secretAccessKey,
-            tableName: resolveResource(source.config.tableName),
+            tableName: source.config.tableName,
           },
         };
       }
@@ -107,8 +55,8 @@ export default function getAppSyncConfig(context, appSyncConfig) {
         if (context.serverless.service.functions[functionName] === undefined) {
           return null;
         }
-
-        const [fileName, handler] = context.serverless.service.functions[functionName].handler.split('.');
+        const func = context.serverless.service.functions[functionName];
+        const [fileName, handler] = func.handler.split('.');
         return {
           ...dataSource,
           invoke: (payload) => invoke({
@@ -116,7 +64,10 @@ export default function getAppSyncConfig(context, appSyncConfig) {
             handler,
             fileName: path.join(context.options.location, fileName),
             event: payload,
-            environment: context.serverless.service.provider.environment || {},
+            environment: {
+              ...context.serverless.service.provider.environment,
+              ...func.environment,
+            },
           }),
         };
       }
@@ -124,7 +75,7 @@ export default function getAppSyncConfig(context, appSyncConfig) {
       case 'HTTP': {
         return {
           ...dataSource,
-          endpoint: resolveResource(source.config.endpoint),
+          endpoint: source.config.endpoint,
         };
       }
       default:

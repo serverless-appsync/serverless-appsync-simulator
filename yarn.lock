@@ -2377,10 +2377,10 @@ cfn-lint@^1.7.2:
     source-map-support "^0.5.0"
     winston "^2.4.0"
 
-cfn-resolver-lib@^1.0.7:
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/cfn-resolver-lib/-/cfn-resolver-lib-1.0.7.tgz#1b921a54dfbcf72a358b4e884880d8ecf38c168f"
-  integrity sha512-uI+KzLWieMFBS5C1sewT2o1ygU170WdU2hMNvWcsYHMkU6kyWwxgnF/QgO3vtkvBa5v3LjjEt+Qtqy2v6TZROw==
+cfn-resolver-lib@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/cfn-resolver-lib/-/cfn-resolver-lib-1.1.0.tgz#f66029b2bb47097341a61aa614a88bf7f6c00614"
+  integrity sha512-/cqElJtYaWugnRgGKUrpYRomAG7QbO5zXiHNgD2DkH9q5E44EWXlh+06dCmhPwXiIGKp2oh5meGsmTLxzMGvkg==
   dependencies:
     chai "^4.2.0"
     lodash "^4.17.15"
