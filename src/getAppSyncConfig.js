@@ -52,10 +52,21 @@ export default function getAppSyncConfig(context, appSyncConfig) {
       }
       case 'AWS_LAMBDA': {
         const { functionName } = source.config;
-        if (context.serverless.service.functions[functionName] === undefined) {
+        if (functionName === undefined) {
+          context.plugin.log(
+            `${source.name} does not have a functionName`,
+            { color: 'orange' },
+          );
           return null;
         }
         const func = context.serverless.service.functions[functionName];
+        if (func === undefined) {
+          context.plugin.log(
+            `The ${functionName} function is not defined`,
+            { color: 'orange' },
+          );
+          return null;
+        }
         const [fileName, handler] = func.handler.split('.');
         return {
           ...dataSource,

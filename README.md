@@ -52,8 +52,8 @@ Put options under `custom.appsync-simulator` in your `serverless.yml` file
 | port                     | 20002                 | AppSync operations port                                                                                                        |
 | wsPort                   | 20003                 | AppSync subscriptions port                                                                                                     |
 | location                 | . (base directory)    | Location of the lambda functions handlers.                                                                                     |
-| refMap | {}        | A mapping of references for [resource resolutions](#resource-cloudformation-functions-resolution) for the `Ref` function |
-| getAttMap | {}        | A mapping of references for [resource resolutions](#resource-cloudformation-functions-resolution) for the `GetAtt` function |
+| refMap | {}        | A mapping of [resource resolutions](#resource-cloudformation-functions-resolution) for the `Ref` function |
+| getAttMap | {}        | A mapping of [resource resolutions](#resource-cloudformation-functions-resolution) for the `GetAtt` function |
 | dynamoDb.endpoint        | http://localhost:8000 | Dynamodb endpoint. Specify it if you're not using serverless-dynamodb-local. Otherwise, port is taken from dynamodb-local conf |
 | dynamoDb.region          | localhost             | Dynamodb region. Specify it if you're connecting to a remote Dynamodb intance.                                                 |
 | dynamoDb.accessKeyId     | DEFAULT_ACCESS_KEY    | AWS Access Key ID to access DynamoDB                                                                                           |
@@ -73,13 +73,13 @@ custom:
 # Resource CloudFormation functions resolution
 
 This plugin supports *some* resources resolution from the `Ref` and `Fn:GetAtt` functions
-in your yaml file. It also supports *some* Cfn functions such as `Fn:Join`, `Fb:Sub`, etc.
+in your yaml file. It also supports *some* other Cfn functions such as `Fn:Join`, `Fb:Sub`, etc.
 
-**Note:** Under the hood, this features relies on the [cfn-resolver-lib](https://github.com/robessog/cfn-resolver-lib) package. For more info on suported cfn functions, refer to [the documentation](https://github.com/robessog/cfn-resolver-lib/blob/master/README.md)
+**Note:** Under the hood, this features relies on the [cfn-resolver-lib](https://github.com/robessog/cfn-resolver-lib) package. For more info on supported cfn functions, refer to [the documentation](https://github.com/robessog/cfn-resolver-lib/blob/master/README.md)
 
 ## Basic usage
 
-You can reference resources in your functions' environment variables or datasource definition.
+You can reference resources in your functions' environment variables or datasource definitions.
 The plugin will automatically resolve them for you.
 
 ````yaml
@@ -104,7 +104,7 @@ resources:
 # in your appsync config
 dataSources:
   - type: AMAZON_DYNAMODB
-    name: reportsTable
+    name: dynamosource
     config:
       tableName:
         Ref: MyDbTable # resolves to `myTable`
@@ -112,9 +112,9 @@ dataSources:
 
 ## Override (or mock) values
 
-Sometimes, some references **cannot** be resolved, as they result in an *Output* from Cloudformation. Or you might want to use mocked values in your local environment.
+Sometimes, some references **cannot** be resolved, as they come from an *Output* from Cloudformation; or you might want to use mocked values in your local environment.
 
-In those cases, you can define (or override) those values using the `refMap` and `getAtt` options of the plugin.
+In those cases, you can define (or override) those values using the `refMap` and `getAtt` options.
 
 - `refMap` takes a mapping of *resource name* to *value* pairs
 - `getAtt` takes a mapping of *resource name* to *attribute/values* pairs
@@ -134,7 +134,7 @@ custom:
 # in your appsync config
 dataSources:
   - type: AMAZON_ELASTICSEARCH
-    name: reportsTable
+    name: elasticsource
     config:
       # endpoint resolves as 'http://localhost:9200'
       endpoint:
@@ -176,7 +176,7 @@ This plugin supports resolvers implemented by `amplify-appsync-simulator`, as we
 - AMAZON_ELASTIC_SEARCH
 - HTTP
 
-(*) The AWS_LAMBDA dataloader has been partially copied from Aws Amplify but has been extended
+(*) The `AWS_LAMBDA` dataloader has been partially copied from Aws Amplify but has been extended
 to support the *BatchInvoke* operations
 
 **Not Supported / TODO**

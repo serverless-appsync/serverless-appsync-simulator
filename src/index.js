@@ -3,6 +3,7 @@ import {
   addDataLoader,
   removeDataLoader,
 } from 'amplify-appsync-simulator';
+import { inspect } from 'util';
 import { get, merge, reduce } from 'lodash';
 import NodeEvaluator from 'cfn-resolver-lib';
 import getAppSyncConfig from './getAppSyncConfig';
@@ -19,7 +20,6 @@ const resolverPathMap = {
 class ServerlessAppSyncSimulator {
   constructor(serverless) {
     this.serverless = serverless;
-    this.serverlessLog = serverless.cli.log.bind(serverless.cli);
     this.options = merge(
       {
         apiKey: '0123456789',
@@ -37,6 +37,9 @@ class ServerlessAppSyncSimulator {
       },
       get(this.serverless.service, 'custom.appsync-simulator', {}),
     );
+    this.log = this.log.bind(this);
+    this.debugLog = this.debugLog.bind(this);
+
     this.simulator = null;
 
     // Hack: appsync-cli-simulator does not support BatchInvoke.
@@ -50,6 +53,16 @@ class ServerlessAppSyncSimulator {
       'before:offline:start:init': this.startServer.bind(this),
       'before:offline:start:end': this.endServer.bind(this),
     };
+  }
+
+  log(message, opts = {}) {
+    return this.serverless.cli.log(message, 'AppSync Simulator', opts);
+  }
+
+  debugLog(message, opts = {}) {
+    if (process.env.SLS_DEBUG) {
+      this.log(message, opts);
+    }
   }
 
   async startServer() {
@@ -78,26 +91,24 @@ class ServerlessAppSyncSimulator {
         : this.serverless.service.custom.appSync;
 
       const config = getAppSyncConfig({
+        plugin: this,
         serverless: this.serverless,
         options: this.options,
       }, appSync);
 
-
-      if (process.env.SLS_DEBUG) {
-        this.serverlessLog(`AppSync Config ${appSync.name}`);
-        this.serverlessLog(JSON.stringify(config, null, 4));
-      }
+      this.debugLog(`AppSync Config ${appSync.name}`);
+      this.debugLog(inspect(config, { depth: 4, colors: true }));
 
       this.simulator.init(config);
-      this.serverlessLog(`AppSync endpoint: ${this.simulator.url}/graphql`);
-      this.serverlessLog(`GraphiQl: ${this.simulator.url}`);
+      this.log(`AppSync endpoint: ${this.simulator.url}/graphql`);
+      this.log(`GraphiQl: ${this.simulator.url}`);
     } catch (error) {
-      this.serverlessLog(error);
+      this.log(error, { color: 'red' });
     }
   }
 
   endServer() {
-    this.serverlessLog('Halting AppSync Simulator');
+    this.log('Halting AppSync Simulator');
     this.simulator.stop();
   }
 
