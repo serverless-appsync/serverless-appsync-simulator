@@ -5,6 +5,7 @@
   "author": "bboure",
   "license": "MIT",
   "private": false,
+  "description": "Offline support for serverless-appsync-plugin",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bboure/serverless-appsync-simulator.git"
