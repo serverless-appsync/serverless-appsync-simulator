@@ -72,8 +72,8 @@ custom:
 
 # Resource CloudFormation functions resolution
 
-This plugin supports *some* resources resolution from the `Ref` and `Fn:GetAtt` functions
-in your yaml file. It also supports *some* other Cfn functions such as `Fn:Join`, `Fb:Sub`, etc.
+This plugin supports *some* resources resolution from the `Ref` and `Fn::GetAtt` functions
+in your yaml file. It also supports *some* other Cfn functions such as `Fn::Join`, `Fb::Sub`, etc.
 
 **Note:** Under the hood, this features relies on the [cfn-resolver-lib](https://github.com/robessog/cfn-resolver-lib) package. For more info on supported cfn functions, refer to [the documentation](https://github.com/robessog/cfn-resolver-lib/blob/master/README.md)
 
@@ -148,7 +148,7 @@ dataSources:
 
 ## Limitations
 
-This plugin only tries to resolve the following parts of the yml file:
+This plugin only tries to resolve the following parts of the yml tree:
 - `provider.environment`
 - `functions[*].environment`
 - `custom.appSync`
