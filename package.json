@@ -23,7 +23,7 @@
     "amplify-util-mock": "^3.5.0",
     "aws-sdk": "^2.585.0",
     "axios": "^0.19.0",
-    "cfn-resolver-lib": "^1.1.0",
+    "cfn-resolver-lib": "^1.1.2",
     "dataloader": "^2.0.0",
     "lodash": "^4.17.15"
   },
