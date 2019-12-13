@@ -79,7 +79,7 @@ in your yaml file. It also supports *some* other Cfn functions such as `Fn::Join
 
 ## Basic usage
 
-You can reference resources in your functions' environment variables or datasource definitions.
+You can reference resources in your functions' environment variables (that will be accessible from your lambda functions) or datasource definitions.
 The plugin will automatically resolve them for you.
 
 ````yaml
@@ -114,10 +114,10 @@ dataSources:
 
 Sometimes, some references **cannot** be resolved, as they come from an *Output* from Cloudformation; or you might want to use mocked values in your local environment.
 
-In those cases, you can define (or override) those values using the `refMap` and `getAtt` options.
+In those cases, you can define (or override) those values using the `refMap` and `getAttMap` options.
 
 - `refMap` takes a mapping of *resource name* to *value* pairs
-- `getAtt` takes a mapping of *resource name* to *attribute/values* pairs
+- `getAttMap` takes a mapping of *resource name* to *attribute/values* pairs
 
 Example:
 
@@ -128,6 +128,7 @@ custom:
       # Override `MyDbTable` resolution from the previous example.
       MyDbTable: 'mock-myTable'
     getAttMap:
+      # define ElasticSearchInstance DomainName
       ElasticSearchInstance:
         DomainEndpoint: "localhost:9200"
 
@@ -155,7 +156,7 @@ This plugin only tries to resolve the following parts of the yml tree:
 
 If you have the need of resolving others, feel free to open an issue and explain your use case.
 
-For now, the supported resources to be automatically resovled are
+For now, the supported resources to be automatically resovled by `Ref:` are:
 - DynamoDb tables
 - S3 Buckets
 

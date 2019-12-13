@@ -136,11 +136,7 @@ class ServerlessAppSyncSimulator {
    * Resolves resourses through `Ref:` or `Fn:GetAtt`
    */
   resolveResources(input) {
-    const evaluator = new NodeEvaluator(
-      input,
-      this.resourceResolvers,
-      process.env.SLS_DEBUG,
-    );
+    const evaluator = new NodeEvaluator(input, this.resourceResolvers);
     return evaluator.evaluateNodes();
   }
 }
