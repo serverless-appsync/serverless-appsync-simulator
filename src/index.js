@@ -116,9 +116,19 @@ class ServerlessAppSyncSimulator {
       {},
     );
 
+    const keyValueArrayToObject = (mapping) => {
+      if (Array.isArray(mapping)) {
+        return mapping.reduce((acc, { key, value }) => (
+          { ...acc, [key]: value }
+        ), {});
+      }
+      return mapping;
+    };
+
     this.resourceResolvers = {
-      RefResolvers: { ...refResolvers, ...this.options.refMap },
-      'Fn::GetAttResolvers': this.options.getAttMap,
+      RefResolvers: { ...refResolvers, ...keyValueArrayToObject(this.options.refMap) },
+      'Fn::GetAttResolvers': keyValueArrayToObject(this.options.getAttMap),
+      'Fn::ImportValueResolvers': keyValueArrayToObject(this.options.importValueMap),
     };
   }
 
@@ -131,6 +141,7 @@ class ServerlessAppSyncSimulator {
         location: '.',
         refMap: {},
         getAttMap: {},
+        importValueMap: {},
         dynamoDb: {
           endpoint: `http://localhost:${get(
             this.serverless.service,
