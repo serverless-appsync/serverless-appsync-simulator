@@ -11,10 +11,10 @@ const getBatchDataResolver = (loaderName, resolver) => {
 
 const getLoaderName = (payload, config) => {
   const parts = [config.name];
-  if (payload && payload.info && payload.info.parentTypeName) {
+  if (payload?.info?.parentTypeName) {
     parts.push(payload.info.parentTypeName);
   }
-  if (payload && payload.info && payload.info.fieldName) {
+  if (payload?.info?.fieldName) {
     parts.push(payload.info.fieldName);
   }
   return parts.join('.');
