@@ -166,8 +166,6 @@ class ServerlessAppSyncSimulator {
   resolveResources(toBeResolved) {
     // Pass all resources to allow Fn::GetAtt and Conditions resolution
     const node = {
-      // Conditions must appear before Resources, see https://github.com/bboure/serverless-appsync-simulator/pull/31#issuecomment-633872077
-      Conditions: this.serverless.service.resources?.Conditions || {},
       ...this.serverless.service.resources,
       toBeResolved,
     };
