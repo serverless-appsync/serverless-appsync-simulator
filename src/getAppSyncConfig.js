@@ -189,15 +189,17 @@ export default function getAppSyncConfig(context, appSyncConfig) {
 
   // Load the schema. If multiple provided, merge them
   const schemaPaths = Array.isArray(cfg.schema) ? cfg.schema : [cfg.schema || 'schema.graphql'];
-  const schemas = schemaPaths.map((schemaPath) => getFileMap(context.serverless.config.servicePath, schemaPath));
+  const schemas = schemaPaths.map(
+    (schemaPath) => getFileMap(context.serverless.config.servicePath, schemaPath),
+  );
   const schema = {
-    path: schemas.find((schema) => schema.path),
-    content: mergeTypes(schemas.map((schema) => schema.content)),
+    path: schemas.find((s) => s.path),
+    content: mergeTypes(schemas.map((s) => s.content)),
   };
 
   return {
     appSync: makeAppSync(cfg),
-    schema: schema, 
+    schema,
     resolvers: cfg.mappingTemplates.map(makeResolver),
     dataSources: cfg.dataSources.map(makeDataSource).filter((v) => v !== null),
     functions: cfg.functionConfigurations.map(makeFunctionConfiguration),
