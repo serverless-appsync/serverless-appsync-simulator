@@ -1,9 +1,6 @@
-import {
-  AmplifyAppSyncSimulator,
-  addDataLoader,
-} from 'amplify-appsync-simulator';
+import { addDataLoader, AmplifyAppSyncSimulator, } from 'amplify-appsync-simulator';
 import { inspect } from 'util';
-import { get, merge, reduce } from 'lodash';
+import { get, merge, reduce, isArray, isObject } from 'lodash';
 import NodeEvaluator from 'cfn-resolver-lib';
 import getAppSyncConfig from './getAppSyncConfig';
 import NotImplementedDataLoader from './data-loaders/NotImplementedDataLoader';
@@ -55,7 +52,7 @@ class ServerlessAppSyncSimulator {
         this.serverless.service.provider.environment,
       );
       this.serverless.service.custom.appSync = this.resolveResources(
-        this.serverless.service.custom.appSync,
+        this.stripIAMRole(this.serverless.service.custom.appSync)
       );
 
       this.simulator = new AmplifyAppSyncSimulator({
@@ -171,6 +168,34 @@ class ServerlessAppSyncSimulator {
     }
 
     return toBeResolved;
+  }
+
+  stripIAMRole(appsyncConfig) {
+    // Function to trverse a tree and map leaves that only match a key
+    const findFold = (remKey, tree, update) => {
+      const recurse = (remkey, node, parent = null) => {
+        if (remkey.length === 0) {
+          return update(node, parent);
+        }
+
+        if ((0, isArray)(node)) {
+          return node.map(child => recurse(remkey, child, node));
+        } else if ((0, isObject)(node)) {
+          const [key, ...newRemkey] = remkey;
+          return {
+            ...node,
+            [key]: key in node ? recurse(newRemkey, node[key], node) : undefined
+          };
+        } else {
+          return node;
+        }
+      };
+
+      return recurse(remKey, tree, null);
+    };
+
+    const target = 'dataSources/config/iamRoleStatements'.split('/');
+    return findFold(target, appsyncConfig, () => undefined);
   }
 }
 
