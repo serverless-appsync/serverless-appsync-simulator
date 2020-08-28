@@ -68,7 +68,11 @@ export default function getAppSyncConfig(context, appSyncConfig) {
           return {
             ...dataSource,
             invoke: async (payload) => {
-              const result = await axios.post(func.url, payload);
+              const result = await axios.request({
+                url: func.url,
+                method: func.method,
+                data: payload,
+              });
               return result.data;
             }
           }
