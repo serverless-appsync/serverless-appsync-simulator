@@ -62,7 +62,7 @@ export default function getAppSyncConfig(context, appSyncConfig) {
           return null;
         }
 
-        const conf = appSyncConfig;
+        const conf = context.options;
         if (conf.functions && conf.functions[functionName] !== undefined) {
           const func = conf.functions[functionName];
           return {

@@ -9,6 +9,11 @@ plugins:
     - serverless-appsync-plugin
 
 custom:
+    appsync-simulator:
+        functions:
+            myLambda:
+                url: https://jsonplaceholder.typicode.com/posts
+                method: GET
     appSync:
         name: Test
         schema: schema.graphql
@@ -26,7 +31,3 @@ custom:
               config:
                   functionName: myLambda
                   lambdaFunctionArn: "arn:aws:lambda:${self:provider.region}:*:getPosts-graphql"
-        functions:
-            myLambda:
-                url: https://jsonplaceholder.typicode.com/posts
-                method: GET
