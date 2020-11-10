@@ -1,11 +1,8 @@
-import {
-  AmplifyAppSyncSimulatorAuthenticationType as AuthTypes,
-} from 'amplify-appsync-simulator';
-import { invoke } from 'amplify-nodejs-function-runtime-provider/lib/utils/invoke';
-import fs from 'fs';
-import { forEach } from 'lodash';
-import path from 'path';
-import { mergeTypes } from 'merge-graphql-schemas';
+import { AmplifyAppSyncSimulatorAuthenticationType as AuthTypes } from "amplify-appsync-simulator";
+import fs from "fs";
+import { forEach } from "lodash";
+import path from "path";
+import { mergeTypes } from "merge-graphql-schemas";
 
 export default function getAppSyncConfig(context, appSyncConfig) {
   // Flattening params
@@ -70,19 +67,7 @@ export default function getAppSyncConfig(context, appSyncConfig) {
         }
         return {
           ...dataSource,
-          invoke: (payload) => invoke({
-            packageFolder: path.join(
-              context.serverless.config.servicePath,
-              context.options.location,
-            ),
-            handler: func.handler,
-            event: JSON.stringify(payload),
-            environment: {
-              ...(context.options.lambda.loadLocalEnv === true ? process.env : {}),
-              ...context.serverless.service.provider.environment,
-              ...func.environment,
-            },
-          }),
+          invoke: (payload) => invokeHandler(functionName, context, payload),
         };
       }
       case 'AMAZON_ELASTICSEARCH':
@@ -208,4 +193,44 @@ export default function getAppSyncConfig(context, appSyncConfig) {
     functions: cfg.functionConfigurations.map(makeFunctionConfiguration),
     mappingTemplates: makeMappingTemplates(cfg),
   };
+}
+
+async function invokeHandler(functionName, context, event) {
+  // Store deep copy of cliOptions so we can restore later
+  const oldOptions = Object.assign(
+    {},
+    { ...context.serverless.pluginManager.cliOptions }
+  );
+
+  context.serverless.pluginManager.cliOptions["f"] = functionName;
+  context.serverless.pluginManager.cliOptions["d"] = JSON.stringify(event);
+
+  // Capture stdout temporarily
+  let output = "";
+
+  // Save original write so we can restore later
+  process.stdout._orig_write = process.stdout.write;
+  process.stdout.write = (data) => {
+    output += data;
+
+    process.stdout._orig_write(data);
+  };
+
+  // Run serverless invoke local
+  await context.serverless.pluginManager.run(["invoke", "local"]);
+
+  // Restore changes
+  context.serverless.pluginManager.cliOptions = oldOptions;
+  process.stdout.write = process.stdout._orig_write;
+
+  let result;
+
+  // If we can't parse it, just return watever was read
+  try {
+    result = JSON.parse(output);
+  } catch (err) {
+    result = output;
+  }
+
+  return result;
 }
