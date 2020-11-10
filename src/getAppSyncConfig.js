@@ -197,22 +197,15 @@ export default function getAppSyncConfig(context, appSyncConfig) {
 
 async function invokeHandler(functionName, context, event) {
   // Store deep copy of cliOptions so we can restore later
-  const oldOptions = Object.assign(
-    {},
-    { ...context.serverless.pluginManager.cliOptions }
-  );
+  context.serverless.pluginManager.cliOptions["function"] = functionName;
+  context.serverless.pluginManager.cliOptions["data"] = JSON.stringify(event); // Capture stdout temporarily
 
-  context.serverless.pluginManager.cliOptions["f"] = functionName;
-  context.serverless.pluginManager.cliOptions["d"] = JSON.stringify(event);
-
-  // Capture stdout temporarily
   let output = "";
 
   // Save original write so we can restore later
   process.stdout._orig_write = process.stdout.write;
   process.stdout.write = (data) => {
     output += data;
-
     process.stdout._orig_write(data);
   };
 
@@ -220,12 +213,13 @@ async function invokeHandler(functionName, context, event) {
   await context.serverless.pluginManager.run(["invoke", "local"]);
 
   // Restore changes
-  context.serverless.pluginManager.cliOptions = oldOptions;
+  delete context.serverless.pluginManager.cliOptions["function"];
+  delete context.serverless.pluginManager.cliOptions["data"];
+
   process.stdout.write = process.stdout._orig_write;
 
+  // If we can't parse it, just return whatever was read
   let result;
-
-  // If we can't parse it, just return watever was read
   try {
     result = JSON.parse(output);
   } catch (err) {
