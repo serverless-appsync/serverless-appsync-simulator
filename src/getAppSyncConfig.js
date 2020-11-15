@@ -72,6 +72,7 @@ export default function getAppSyncConfig(context, appSyncConfig) {
                 url: func.url,
                 method: func.method,
                 data: payload,
+                validateStatus: false,
               });
               return result.data;
             }
