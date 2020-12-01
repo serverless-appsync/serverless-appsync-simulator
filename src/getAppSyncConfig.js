@@ -1,8 +1,9 @@
 import { AmplifyAppSyncSimulatorAuthenticationType as AuthTypes } from "amplify-appsync-simulator";
-import fs from "fs";
-import { forEach } from "lodash";
-import path from "path";
-import { mergeTypes } from "merge-graphql-schemas";
+import axios from 'axios';
+import fs from 'fs';
+import { forEach } from 'lodash';
+import path from 'path';
+import { mergeTypes } from 'merge-graphql-schemas';
 
 export default function getAppSyncConfig(context, appSyncConfig) {
   // Flattening params
@@ -57,6 +58,24 @@ export default function getAppSyncConfig(context, appSyncConfig) {
           );
           return null;
         }
+
+        const conf = context.options;
+        if (conf.functions && conf.functions[functionName] !== undefined) {
+          const func = conf.functions[functionName];
+          return {
+            ...dataSource,
+            invoke: async (payload) => {
+              const result = await axios.request({
+                url: func.url,
+                method: func.method,
+                data: payload,
+                validateStatus: false,
+              });
+              return result.data;
+            }
+          }
+        }
+
         const func = context.serverless.service.functions[functionName];
         if (func === undefined) {
           context.plugin.log(
@@ -65,6 +84,7 @@ export default function getAppSyncConfig(context, appSyncConfig) {
           );
           return null;
         }
+
         return {
           ...dataSource,
           invoke: (payload) => invokeHandler(functionName, context, payload),
