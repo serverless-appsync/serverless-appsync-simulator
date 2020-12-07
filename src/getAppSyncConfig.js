@@ -197,8 +197,8 @@ export default function getAppSyncConfig(context, appSyncConfig) {
 
       const defaultTemplatePrefix = getDefaultTemplatePrefix(template);
 
-      const requestTemplate = request || `${defaultTemplatePrefix}.request.vtl`;
-      const responseTemplate = response || `${defaultTemplatePrefix}.response.vtl`;
+      const requestTemplate = request || cfg.defaultMappingTemplates.request || `${defaultTemplatePrefix}.request.vtl`;
+      const responseTemplate = response || cfg.defaultMappingTemplates.response || `${defaultTemplatePrefix}.response.vtl`;
 
       // Substitutions
       const allSubstitutions = { ...config.substitutions, ...substitutions };
