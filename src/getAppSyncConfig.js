@@ -4,7 +4,7 @@ import {
 import { invoke } from 'amplify-nodejs-function-runtime-provider/lib/utils/invoke';
 import axios from 'axios';
 import fs from 'fs';
-import { forEach } from 'lodash';
+import { forEach, isNil } from 'lodash';
 import path from 'path';
 import { mergeTypes } from 'merge-graphql-schemas';
 
@@ -197,8 +197,25 @@ export default function getAppSyncConfig(context, appSyncConfig) {
 
       const defaultTemplatePrefix = getDefaultTemplatePrefix(template);
 
-      const requestTemplate = request || cfg.defaultMappingTemplates.request || `${defaultTemplatePrefix}.request.vtl`;
-      const responseTemplate = response || cfg.defaultMappingTemplates.response || `${defaultTemplatePrefix}.response.vtl`;
+      const requestTemplate = !isNil(request)
+              ? request
+              : !isNil(cfg.defaultMappingTemplates.request)
+                ? cfg.defaultMappingTemplates.request
+                : `${defaultTemplatePrefix}.request.vtl`;
+
+      if (requestTemplate === false) {
+        throw new Error('Sorry, this plugin does not support Direct Lambda resolvers yet.');
+      }
+
+      const responseTemplate = !isNil(response)
+              ? response
+              : !isNil(cfg.defaultMappingTemplates.response)
+                ? cfg.defaultMappingTemplates.response
+                : `${defaultTemplatePrefix}.response.vtl`;
+
+      if (responseTemplate === false) {
+        throw new Error('Sorry, this plugin does not support Direct Lambda resolvers yet.');
+      }
 
       // Substitutions
       const allSubstitutions = { ...config.substitutions, ...substitutions };
