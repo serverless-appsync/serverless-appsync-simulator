@@ -1,4 +1,4 @@
-import { AmplifyAppSyncSimulatorAuthenticationType as AuthTypes } from "amplify-appsync-simulator";
+import { AmplifyAppSyncSimulatorAuthenticationType as AuthTypes } from 'amplify-appsync-simulator';
 import axios from 'axios';
 import fs from 'fs';
 import { forEach, isNil, first } from 'lodash';
@@ -221,34 +221,28 @@ export default function getAppSyncConfig(context, appSyncConfig) {
 
 async function invokeHandler(functionName, context, event) {
   // Store deep copy of cliOptions so we can restore later
-  context.serverless.pluginManager.cliOptions["function"] = functionName;
-  context.serverless.pluginManager.cliOptions["data"] = JSON.stringify(event); // Capture stdout temporarily
+  context.serverless.pluginManager.cliOptions['function'] = functionName;
+  context.serverless.pluginManager.cliOptions['data'] = JSON.stringify(event); // Capture stdout temporarily
 
-  let output = "";
+  let output = '';
 
   // Save original write so we can restore later
   process.stdout._orig_write = process.stdout.write;
   process.stdout.write = (data) => {
+    if (data.charAt(data.length - 1) == '\n') data = data.slice(0, -1);
     output += data;
     process.stdout._orig_write(data);
   };
 
   // Run serverless invoke local
-  await context.serverless.pluginManager.run(["invoke", "local"]);
+  await context.serverless.pluginManager.run(['invoke', 'local']);
+  process.stdout._orig_write('\n');
 
   // Restore changes
-  delete context.serverless.pluginManager.cliOptions["function"];
-  delete context.serverless.pluginManager.cliOptions["data"];
+  delete context.serverless.pluginManager.cliOptions['function'];
+  delete context.serverless.pluginManager.cliOptions['data'];
 
   process.stdout.write = process.stdout._orig_write;
 
-  // If we can't parse it, just return whatever was read
-  let result;
-  try {
-    result = JSON.parse(output);
-  } catch (err) {
-    result = output;
-  }
-
-  return result;
+  return JSON.parse(output);
 }
