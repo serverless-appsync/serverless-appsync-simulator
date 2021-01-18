@@ -145,7 +145,7 @@ Example:
 
 ```yaml
 custom:
-  serverless-appsync-simulator:
+  appsync-simulator:
     refMap:
       # Override `MyDbTable` resolution from the previous example.
       MyDbTable: 'mock-myTable'
