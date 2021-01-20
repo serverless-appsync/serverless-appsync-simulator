@@ -1,5 +1,6 @@
 [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release) ![Release](https://github.com/bboure/serverless-appsync-simulator/workflows/Release/badge.svg) <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-11-orange.svg?style=flat-square)](#contributors-)
+
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 This serverless plugin is a wrapper for [amplify-appsync-simulator](https://github.com/aws-amplify/amplify-cli/tree/master/packages/amplify-appsync-simulator) made for testing AppSync APIs built with [serverless-appsync-plugin](https://github.com/sid88in/serverless-appsync-plugin).
@@ -224,7 +225,7 @@ Feel free to open a PR or an issue to extend them as well.
 
 # External functions
 
-When a function is not defined withing the current serverless file you can still call it by providing an invoke url which should point to a REST method (must be post).
+When a function is not defined withing the current serverless file you can still call it by providing an invoke url which should point to a REST method. Make sure you specify "get" or "post" for the method. Default is "get", but you probably want "post".
 
 ```yaml
 custom:
@@ -232,8 +233,10 @@ custom:
     functions:
       addUser:
         url: http://localhost:3016/2015-03-31/functions/addUser/invocations
+        method: post
       addPost:
         url: https://jsonplaceholder.typicode.com/posts
+        method: post
 ```
 
 # Supported Resolver types
