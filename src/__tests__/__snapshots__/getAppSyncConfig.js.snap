@@ -128,6 +128,7 @@ Array [
       "endpoint": "http://localhost:8000",
       "region": "localhost",
       "secretAccessKey": "DEFAULT_SECRET",
+      "sessionToken": "DEFAULT_SESSION_TOKEN",
       "tableName": "myTable",
     },
     "name": "dynamodb",
