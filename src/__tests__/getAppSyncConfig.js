@@ -104,6 +104,7 @@ describe('getAppSyncConfig', () => {
             region: 'localhost',
             accessKeyId: 'DEFAULT_ACCESS_KEY',
             secretAccessKey: 'DEFAULT_SECRET',
+            sessionToken: 'DEFAULT_SESSION_TOKEN',
           },
         },
         serverless: {

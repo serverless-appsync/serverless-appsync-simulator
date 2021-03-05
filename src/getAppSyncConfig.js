@@ -59,6 +59,7 @@ export default function getAppSyncConfig(context, appSyncConfig) {
           region,
           accessKeyId,
           secretAccessKey,
+          sessionToken,
         } = context.options.dynamoDb;
 
         return {
@@ -68,6 +69,7 @@ export default function getAppSyncConfig(context, appSyncConfig) {
             region,
             accessKeyId,
             secretAccessKey,
+            sessionToken,
             tableName: source.config.tableName,
           },
         };
