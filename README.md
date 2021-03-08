@@ -68,7 +68,7 @@ Put options under `custom.appsync-simulator` in your `serverless.yml` file
 | dynamoDb.accessKeyId     | DEFAULT_ACCESS_KEY         | AWS Access Key ID to access DynamoDB                                                                                                                                |
 | dynamoDb.secretAccessKey | DEFAULT_SECRET             | AWS Secret Key to access DynamoDB                                                                                                                                   |
 | dynamoDb.sessionToken    | DEFAULT_ACCESS_TOKEEN      | AWS Session Token to access DynamoDB, only if you have  temporary security credentials configured on AWS                                                            |
-| dynamoDb.*               |                            | You can add every configuration accepted by DynamoDB                                                                                                                |
+| dynamoDb.*               |                            | You can add every configuration accepted by [DynamoDB SDK](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB.html#constructor-property)                                                                                |
 | watch                    | - \*.graphql<br/> - \*.vtl | Array of glob patterns to watch for hot-reloading.                                                                                                                  |
 
 Example:
