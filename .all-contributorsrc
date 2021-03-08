@@ -108,6 +108,16 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "Scale93",
+      "name": "Scale93",
+      "avatar_url": "https://avatars.githubusercontent.com/u/36473880?v=4",
+      "profile": "https://github.com/Scale93",
+      "contributions": [
+        "code",
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
