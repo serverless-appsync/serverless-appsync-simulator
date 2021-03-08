@@ -54,22 +54,10 @@ export default function getAppSyncConfig(context, appSyncConfig) {
 
     switch (source.type) {
       case 'AMAZON_DYNAMODB': {
-        const {
-          endpoint,
-          region,
-          accessKeyId,
-          secretAccessKey,
-          sessionToken,
-        } = context.options.dynamoDb;
-
         return {
           ...dataSource,
           config: {
-            endpoint,
-            region,
-            accessKeyId,
-            secretAccessKey,
-            sessionToken,
+            ...context.options.dynamoDb,
             tableName: source.config.tableName,
           },
         };
