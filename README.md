@@ -87,8 +87,18 @@ Changes to `*.yml` files are not supported (yet? - this is a Serverless Framewor
 
 Hot-reloading relies on [watchman](https://facebook.github.io/watchman). Make sure it is [installed](https://facebook.github.io/watchman/docs/install.html) on your system.
 
-You can change the files being watched with the `watch` option.
-Or you can opt-out by leaving an emptry array or set the option to `false`.
+You can change the files being watched with the `watch` option, which is then passed to watchman as [the match expression](https://facebook.github.io/watchman/docs/expr/match.html).
+
+e.g.
+```
+custom:
+  appsync-simulator:
+    watch:
+      - ["match", "handlers/**/*.vtl", "wholename"] # => array is interpreted as the literal match expression
+      - "*.graphql"                                 # => string like this is equivalent to `["match", "*.graphql"]`
+```
+
+Or you can opt-out by leaving an empty array or set the option to `false`
 
 Note: Functions should not require hot-reloading, unless you are using a transpiler or a bundler (such as webpack, babel or typescript), un which case you should delegate hot-reloading to that instead.
 

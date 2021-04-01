@@ -120,7 +120,12 @@ class ServerlessAppSyncSimulator {
       const sub = {
         expression: [
           'anyof',
-          ...this.options.watch.map((glob) => ['match', glob]),
+          ...this.options.watch.map((glob) => {
+            if (Array.isArray(glob)) {
+              return glob;
+            }
+            return ['match', glob];
+          }),
         ],
         fields: ['name'],
         since: resp.clock,
