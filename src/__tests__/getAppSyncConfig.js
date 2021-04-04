@@ -6,6 +6,7 @@ describe('getAppSyncConfig', () => {
     const config = {
       name: 'myAPI',
       authenticationType: 'API_KEY',
+      schema: '*.graphql',
       defaultMappingTemplates: {
         request: 'default.request.vtl',
         response: 'default.response.vtl',

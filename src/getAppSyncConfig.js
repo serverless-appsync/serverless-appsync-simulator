@@ -5,6 +5,7 @@ import fs from 'fs';
 import { forEach, isNil, first } from 'lodash';
 import path from 'path';
 import { mergeTypes } from 'merge-graphql-schemas';
+import * as globby from 'globby';
 import directLambdaRequest from './templates/direct-lambda.request.vtl';
 import directLambdaResponse from './templates/direct-lambda.response.vtl';
 
@@ -35,9 +36,26 @@ export default function getAppSyncConfig(context, appSyncConfig) {
     });
   };
 
+  const toAbsolutePath = (basePath, filePath) =>
+    path.isAbsolute(filePath) ? filePath : path.join(basePath, filePath);
+
+  const globFilePaths = (basePath, filePaths) => {
+    return filePaths
+      .map((filePath) => {
+        const paths = globby.sync(toAbsolutePath(basePath, filePath));
+        if (path.isAbsolute(filePath)) {
+          return paths;
+        } else {
+          // For backward compatibility with FileMap, revert to relative path
+          return paths.map((p) => path.relative(basePath, p));
+        }
+      })
+      .flat();
+  };
+
   const getFileMap = (basePath, filePath) => ({
     path: filePath,
-    content: fs.readFileSync(path.join(basePath, filePath), {
+    content: fs.readFileSync(toAbsolutePath(basePath, filePath), {
       encoding: 'utf8',
     }),
   });
@@ -208,8 +226,9 @@ export default function getAppSyncConfig(context, appSyncConfig) {
   const schemaPaths = Array.isArray(cfg.schema)
     ? cfg.schema
     : [cfg.schema || 'schema.graphql'];
-  const schemas = schemaPaths.map((schemaPath) =>
-    getFileMap(context.serverless.config.servicePath, schemaPath),
+  const basePath = context.serverless.config.servicePath;
+  const schemas = globFilePaths(basePath, schemaPaths).map((schemaPath) =>
+    getFileMap(basePath, schemaPath),
   );
   const schema = {
     path: first(schemas).path,
