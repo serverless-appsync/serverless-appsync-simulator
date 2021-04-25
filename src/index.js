@@ -60,21 +60,24 @@ class ServerlessAppSyncSimulator {
       );
 
       this.simulators = [];
-      if(Array.isArray(this.serverless.service.custom.appSync)) {
+      if (Array.isArray(this.serverless.service.custom.appSync)) {
         let port = this.options.port;
         let wsPort = this.options.wsPort;
-        for(let appSyncConfig of this.serverless.service.custom.appSync) {
+        for (let appSyncConfig of this.serverless.service.custom.appSync) {
           this.simulators.push({
             amplifySimulator: await this.startIndividualServer(port, wsPort),
-            name: appSyncConfig.name
+            name: appSyncConfig.name,
           });
-          port+=10;
-          wsPort+=10;
+          port += 10;
+          wsPort += 10;
         }
       } else {
         this.simulators.push({
-          amplifySimulator: await this.startIndividualServer(this.options.port, this.options.wsPort),
-          name: this.serverless.service.custom.appSync.name
+          amplifySimulator: await this.startIndividualServer(
+            this.options.port,
+            this.options.wsPort,
+          ),
+          name: this.serverless.service.custom.appSync.name,
         });
       }
 
@@ -84,8 +87,10 @@ class ServerlessAppSyncSimulator {
         this.initServers();
       }
 
-      for(let sim of this.simulators) {
-        this.log(`${sim.name} AppSync endpoint: ${sim.amplifySimulator.url}/graphql`);
+      for (let sim of this.simulators) {
+        this.log(
+          `${sim.name} AppSync endpoint: ${sim.amplifySimulator.url}/graphql`,
+        );
         this.log(`${sim.name} GraphiQl: ${sim.amplifySimulator.url}`);
       }
     } catch (error) {
@@ -96,7 +101,7 @@ class ServerlessAppSyncSimulator {
   async startIndividualServer(port, wsPort) {
     const simulator = new AmplifyAppSyncSimulator({
       port: port,
-      wsPort: wsPort
+      wsPort: wsPort,
     });
     await simulator.start();
 
@@ -104,19 +109,24 @@ class ServerlessAppSyncSimulator {
   }
 
   initServers() {
-    const appSyncConfig = Array.isArray(this.serverless.service.custom.appSync) ? this.serverless.service.custom.appSync : [this.serverless.service.custom.appSync];
+    const appSyncConfig = Array.isArray(this.serverless.service.custom.appSync)
+      ? this.serverless.service.custom.appSync
+      : [this.serverless.service.custom.appSync];
 
-    for(let [i, sim] of this.simulators.entries()) {
+    for (let [i, sim] of this.simulators.entries()) {
       this.initIndividualServer(sim, appSyncConfig[i]);
     }
   }
 
   initIndividualServer(simulator, appSyncConfig) {
-    const config = getAppSyncConfig({
-      plugin: this,
-      serverless: this.serverless,
-      options: this.options
-    }, appSyncConfig);
+    const config = getAppSyncConfig(
+      {
+        plugin: this,
+        serverless: this.serverless,
+        options: this.options,
+      },
+      appSyncConfig,
+    );
 
     this.debugLog(`AppSync Config ${appSyncConfig.name}`);
     this.debugLog(inspect(config, { depth: 4, colors: true }));
@@ -185,7 +195,7 @@ class ServerlessAppSyncSimulator {
   endServers() {
     if (this.simulators) {
       this.log('Halting AppSync Simulator');
-      for(let sim of this.simulators) {
+      for (let sim of this.simulators) {
         sim.amplifySimulator.stop();
       }
     }

@@ -5,7 +5,9 @@ export default class NotImplementedDataLoader {
   }
 
   async load() {
-    console.log(`Data Loader not implemented for ${this.config.type} (${this.config.name})`);
+    console.log(
+      `Data Loader not implemented for ${this.config.type} (${this.config.name})`,
+    );
 
     return null;
   }
