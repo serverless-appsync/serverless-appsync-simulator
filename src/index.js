@@ -23,15 +23,15 @@ class ServerlessAppSyncSimulator {
     this.log = this.log.bind(this);
     this.debugLog = this.debugLog.bind(this);
 
-    this.simulator = null;
+    this.simulators = null;
 
     addDataLoader('HTTP', HttpDataLoader);
     addDataLoader('AMAZON_ELASTICSEARCH', ElasticDataLoader);
     addDataLoader('RELATIONAL_DATABASE', NotImplementedDataLoader);
 
     this.hooks = {
-      'before:offline:start:init': this.startServer.bind(this),
-      'before:offline:start:end': this.endServer.bind(this),
+      'before:offline:start:init': this.startServers.bind(this),
+      'before:offline:start:end': this.endServers.bind(this),
     };
   }
 
@@ -45,7 +45,7 @@ class ServerlessAppSyncSimulator {
     }
   }
 
-  async startServer() {
+  async startServers() {
     try {
       this.buildResolvedOptions();
       this.buildResourceResolvers();
@@ -59,43 +59,79 @@ class ServerlessAppSyncSimulator {
         this.serverless.service.custom.appSync,
       );
 
-      this.simulator = new AmplifyAppSyncSimulator({
-        port: this.options.port,
-        wsPort: this.options.wsPort,
-      });
+      this.simulators = [];
+      if (Array.isArray(this.serverless.service.custom.appSync)) {
+        let port = this.options.port;
+        let wsPort = this.options.wsPort;
+        for (let appSyncConfig of this.serverless.service.custom.appSync) {
+          this.simulators.push({
+            amplifySimulator: await this.startIndividualServer(port, wsPort),
+            name: appSyncConfig.name,
+          });
+          port += 10;
+          wsPort += 10;
+        }
+      } else {
+        this.simulators.push({
+          amplifySimulator: await this.startIndividualServer(
+            this.options.port,
+            this.options.wsPort,
+          ),
+          name: this.serverless.service.custom.appSync.name,
+        });
+      }
 
-      await this.simulator.start();
       if (Array.isArray(this.options.watch) && this.options.watch.length > 0) {
         this.watch();
       } else {
-        this.initServer();
+        this.initServers();
       }
 
-      this.log(`AppSync endpoint: ${this.simulator.url}/graphql`);
-      this.log(`GraphiQl: ${this.simulator.url}`);
+      for (let sim of this.simulators) {
+        this.log(
+          `${sim.name} AppSync endpoint: ${sim.amplifySimulator.url}/graphql`,
+        );
+        this.log(`${sim.name} GraphiQl: ${sim.amplifySimulator.url}`);
+      }
     } catch (error) {
       this.log(error, { color: 'red' });
     }
   }
 
-  initServer() {
-    // TODO: suport several API's
-    const appSync = Array.isArray(this.serverless.service.custom.appSync)
-      ? this.serverless.service.custom.appSync[0]
-      : this.serverless.service.custom.appSync;
+  async startIndividualServer(port, wsPort) {
+    const simulator = new AmplifyAppSyncSimulator({
+      port: port,
+      wsPort: wsPort,
+    });
+    await simulator.start();
+
+    return simulator;
+  }
+
+  initServers() {
+    const appSyncConfig = Array.isArray(this.serverless.service.custom.appSync)
+      ? this.serverless.service.custom.appSync
+      : [this.serverless.service.custom.appSync];
+
+    for (let [i, sim] of this.simulators.entries()) {
+      this.initIndividualServer(sim, appSyncConfig[i]);
+    }
+  }
+
+  initIndividualServer(simulator, appSyncConfig) {
     const config = getAppSyncConfig(
       {
         plugin: this,
         serverless: this.serverless,
         options: this.options,
       },
-      appSync,
+      appSyncConfig,
     );
 
-    this.debugLog(`AppSync Config ${appSync.name}`);
+    this.debugLog(`AppSync Config ${appSyncConfig.name}`);
     this.debugLog(inspect(config, { depth: 4, colors: true }));
 
-    this.simulator.init(config);
+    simulator.amplifySimulator.init(config);
   }
 
   watch() {
@@ -108,7 +144,7 @@ class ServerlessAppSyncSimulator {
         console.error('Error initiating watch:', error);
         console.log('AppSync Simulator hot-reloading will not be available');
         // init server once
-        this.initServer();
+        this.initServers();
         return;
       }
 
@@ -151,15 +187,17 @@ class ServerlessAppSyncSimulator {
     client.on('subscription', async (resp) => {
       if (resp.subscription === 'appsync-simulator') {
         console.log('Hot-reloading AppSync simulator...');
-        this.initServer();
+        this.initServers();
       }
     });
   }
 
-  endServer() {
-    if (this.simulator) {
+  endServers() {
+    if (this.simulators) {
       this.log('Halting AppSync Simulator');
-      this.simulator.stop();
+      for (let sim of this.simulators) {
+        sim.amplifySimulator.stop();
+      }
     }
   }
 
