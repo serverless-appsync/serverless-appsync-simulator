@@ -36,13 +36,13 @@ export default function getAppSyncConfig(context, appSyncConfig) {
     });
   };
 
-  const toAbsolutePath = (basePath, filePath) =>
-    path.isAbsolute(filePath) ? filePath : path.join(basePath, filePath);
+  const toAbsolutePosixPath = (basePath, filePath) =>
+    (path.isAbsolute(filePath) ? filePath : path.join(basePath, filePath)).replace(/\\/g, '/');
 
   const globFilePaths = (basePath, filePaths) => {
     return filePaths
       .map((filePath) => {
-        const paths = globby.sync(toAbsolutePath(basePath, filePath));
+        const paths = globby.sync(toAbsolutePosixPath(basePath, filePath));
         if (path.isAbsolute(filePath)) {
           return paths;
         } else {
@@ -55,7 +55,7 @@ export default function getAppSyncConfig(context, appSyncConfig) {
 
   const getFileMap = (basePath, filePath) => ({
     path: filePath,
-    content: fs.readFileSync(toAbsolutePath(basePath, filePath), {
+    content: fs.readFileSync(toAbsolutePosixPath(basePath, filePath), {
       encoding: 'utf8',
     }),
   });
