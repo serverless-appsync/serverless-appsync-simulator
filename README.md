@@ -1,5 +1,6 @@
 [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release) ![Release](https://github.com/bboure/serverless-appsync-simulator/workflows/Release/badge.svg) <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-16-orange.svg?style=flat-square)](#contributors-)
+
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 This serverless plugin is a wrapper for [amplify-appsync-simulator](https://github.com/aws-amplify/amplify-cli/tree/master/packages/amplify-appsync-simulator) made for testing AppSync APIs built with [serverless-appsync-plugin](https://github.com/sid88in/serverless-appsync-plugin).
@@ -51,24 +52,23 @@ Serverless: GraphiQl: http://localhost:20002
 
 Put options under `custom.appsync-simulator` in your `serverless.yml` file
 
-| option                   | default                    | description                                                                                                                                                         |
-| ------------------------ | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| apiKey                   | `0123456789`               | When using `API_KEY` as authentication type, the key to authenticate to the endpoint.                                                                               |
-| port                     | 20002                      | AppSync operations port; if using multiple APIs, the value of this option will be used as a starting point, and each other API will have a port of lastPort + 10 (e.g. 20002, 20012, 20022, etc.)                                                                                                                                             |
-| wsPort                   | 20003                      | AppSync subscriptions port; if using multiple APIs, the value of this option will be used as a starting point, and each other API will have a port of lastPort + 10 (e.g. 20003, 20013, 20023, etc.)                                                                                                                                          |
-| location                 | . (base directory)         | Location of the lambda functions handlers.                                                                                                                          |
-| lambda.loadLocalEnv      | false                      | If `true`, all environment variables (`$ env`) will be accessible from the resolver function. Read more in section [Environment variables](#environment-variables). |
-| refMap                   | {}                         | A mapping of [resource resolutions](#resource-cloudformation-functions-resolution) for the `Ref` function                                                           |
-| getAttMap                | {}                         | A mapping of [resource resolutions](#resource-cloudformation-functions-resolution) for the `GetAtt` function                                                        |
-| importValueMap           | {}                         | A mapping of [resource resolutions](#resource-cloudformation-functions-resolution) for the `ImportValue` function                                                   |
-| functions                | {}                         | A mapping of [external functions](#functions) for providing invoke url for external fucntions                                                                       |
-| dynamoDb.endpoint        | http://localhost:8000      | Dynamodb endpoint. Specify it if you're not using serverless-dynamodb-local. Otherwise, port is taken from dynamodb-local conf                                      |
-| dynamoDb.region          | localhost                  | Dynamodb region. Specify it if you're connecting to a remote Dynamodb intance.                                                                                      |
-| dynamoDb.accessKeyId     | DEFAULT_ACCESS_KEY         | AWS Access Key ID to access DynamoDB                                                                                                                                |
-| dynamoDb.secretAccessKey | DEFAULT_SECRET             | AWS Secret Key to access DynamoDB                                                                                                                                   |
-| dynamoDb.sessionToken    | DEFAULT_ACCESS_TOKEEN      | AWS Session Token to access DynamoDB, only if you have  temporary security credentials configured on AWS                                                            |
-| dynamoDb.*               |                            | You can add every configuration accepted by [DynamoDB SDK](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB.html#constructor-property)                                                                                |
-| watch                    | - \*.graphql<br/> - \*.vtl | Array of glob patterns to watch for hot-reloading.                                                                                                                  |
+| option                   | default                    | description                                                                                                                                                                                          |
+| ------------------------ | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| apiKey                   | `0123456789`               | When using `API_KEY` as authentication type, the key to authenticate to the endpoint.                                                                                                                |
+| port                     | 20002                      | AppSync operations port; if using multiple APIs, the value of this option will be used as a starting point, and each other API will have a port of lastPort + 10 (e.g. 20002, 20012, 20022, etc.)    |
+| wsPort                   | 20003                      | AppSync subscriptions port; if using multiple APIs, the value of this option will be used as a starting point, and each other API will have a port of lastPort + 10 (e.g. 20003, 20013, 20023, etc.) |
+| location                 | . (base directory)         | Location of the lambda functions handlers.                                                                                                                                                           |
+| refMap                   | {}                         | A mapping of [resource resolutions](#resource-cloudformation-functions-resolution) for the `Ref` function                                                                                            |
+| getAttMap                | {}                         | A mapping of [resource resolutions](#resource-cloudformation-functions-resolution) for the `GetAtt` function                                                                                         |
+| importValueMap           | {}                         | A mapping of [resource resolutions](#resource-cloudformation-functions-resolution) for the `ImportValue` function                                                                                    |
+| functions                | {}                         | A mapping of [external functions](#functions) for providing invoke url for external fucntions                                                                                                        |
+| dynamoDb.endpoint        | http://localhost:8000      | Dynamodb endpoint. Specify it if you're not using serverless-dynamodb-local. Otherwise, port is taken from dynamodb-local conf                                                                       |
+| dynamoDb.region          | localhost                  | Dynamodb region. Specify it if you're connecting to a remote Dynamodb intance.                                                                                                                       |
+| dynamoDb.accessKeyId     | DEFAULT_ACCESS_KEY         | AWS Access Key ID to access DynamoDB                                                                                                                                                                 |
+| dynamoDb.secretAccessKey | DEFAULT_SECRET             | AWS Secret Key to access DynamoDB                                                                                                                                                                    |
+| dynamoDb.sessionToken    | DEFAULT_ACCESS_TOKEEN      | AWS Session Token to access DynamoDB, only if you have temporary security credentials configured on AWS                                                                                              |
+| dynamoDb.\*              |                            | You can add every configuration accepted by [DynamoDB SDK](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB.html#constructor-property)                                               |
+| watch                    | - \*.graphql<br/> - \*.vtl | Array of glob patterns to watch for hot-reloading.                                                                                                                                                   |
 
 Example:
 
@@ -90,6 +90,7 @@ Hot-reloading relies on [watchman](https://facebook.github.io/watchman). Make su
 You can change the files being watched with the `watch` option, which is then passed to watchman as [the match expression](https://facebook.github.io/watchman/docs/expr/match.html).
 
 e.g.
+
 ```
 custom:
   appsync-simulator:
@@ -201,21 +202,6 @@ custom:
       - key: other-service-api-${self:provider.stage}-url
         value: 'https://other.api.url.com/graphql'
 ```
-
-## Environment variables
-
-```yaml
-custom:
-  appsync-simulator:
-    lambda:
-      loadLocalEnv: true
-```
-
-If `true`, all environment variables (`$ env`) will be accessible from the resolver function.
-
-If `false`, only environment variables defined in `serverless.yml` will be accessible from the resolver function.
-
-> _Note: `serverless.yml` environment variables have higher priority than local environment variables. Thus some of your local environment variables, could get overridden by environment variables from `serverless.yml`._
 
 ## Limitations
 

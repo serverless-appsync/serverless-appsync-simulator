@@ -36,7 +36,10 @@ export default function getAppSyncConfig(context, appSyncConfig) {
   };
 
   const toAbsolutePosixPath = (basePath, filePath) =>
-    (path.isAbsolute(filePath) ? filePath : path.join(basePath, filePath)).replace(/\\/g, '/');
+    (path.isAbsolute(filePath)
+      ? filePath
+      : path.join(basePath, filePath)
+    ).replace(/\\/g, '/');
 
   const globFilePaths = (basePath, filePaths) => {
     return filePaths
@@ -58,12 +61,6 @@ export default function getAppSyncConfig(context, appSyncConfig) {
       encoding: 'utf8',
     }),
   });
-
-  const isExternalFunction = (conf, functionName) => {
-    return conf.functions && conf.functions[functionName] !== undefined
-      ? true
-      : false;
-  };
 
   const makeDataSource = (source) => {
     if (source.name === undefined || source.type === undefined) {
@@ -95,20 +92,9 @@ export default function getAppSyncConfig(context, appSyncConfig) {
         }
 
         const conf = context.options;
-        let func;
-        let request = {
-          validateStatus: false,
-        };
-
-        if (isExternalFunction(conf, functionName)) {
-          func = conf.functions[functionName];
-          request.url = func.url;
-          request.method = func.method;
-        } else {
-          func = context.serverless.service.functions[functionName];
-          request.url = `http://localhost:${context.options.lambdaPort}/2015-03-31/functions/${func.name}/invocations`;
-          request.method = 'POST';
-        }
+        const func =
+          conf.functions?.[functionName] ||
+          context.serverless.service.functions?.[functionName];
 
         if (func === undefined) {
           context.plugin.log(`The ${functionName} function is not defined`, {
@@ -117,13 +103,23 @@ export default function getAppSyncConfig(context, appSyncConfig) {
           return null;
         }
 
+        let url, method;
+        if (func.url) {
+          url = func.url;
+          method = func.method;
+        } else {
+          url = `http://localhost:${context.options.lambdaPort}/2015-03-31/functions/${func.name}/invocations`;
+        }
         return {
           ...dataSource,
           invoke: async (payload) => {
-            request.data = payload;
-            request.headers = payload.request?.headers;
-
-            const result = await axios.request(request);
+            const result = await axios.request({
+              url,
+              method: method || 'POST',
+              data: payload,
+              headers: payload.request?.headers,
+              validateStatus: false,
+            });
             return result.data;
           },
         };
