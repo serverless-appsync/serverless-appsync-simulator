@@ -1,5 +1,4 @@
 import { AmplifyAppSyncSimulatorAuthenticationType as AuthTypes } from 'amplify-appsync-simulator';
-import { invoke } from 'amplify-nodejs-function-runtime-provider/lib/utils/invoke';
 import axios from 'axios';
 import fs from 'fs';
 import { forEach, isNil, first } from 'lodash';
@@ -37,7 +36,10 @@ export default function getAppSyncConfig(context, appSyncConfig) {
   };
 
   const toAbsolutePosixPath = (basePath, filePath) =>
-    (path.isAbsolute(filePath) ? filePath : path.join(basePath, filePath)).replace(/\\/g, '/');
+    (path.isAbsolute(filePath)
+      ? filePath
+      : path.join(basePath, filePath)
+    ).replace(/\\/g, '/');
 
   const globFilePaths = (basePath, filePaths) => {
     return filePaths
@@ -90,23 +92,10 @@ export default function getAppSyncConfig(context, appSyncConfig) {
         }
 
         const conf = context.options;
-        if (conf.functions && conf.functions[functionName] !== undefined) {
-          const func = conf.functions[functionName];
-          return {
-            ...dataSource,
-            invoke: async (payload) => {
-              const result = await axios.request({
-                url: func.url,
-                method: func.method,
-                data: payload,
-                validateStatus: false,
-              });
-              return result.data;
-            },
-          };
-        }
+        const func =
+          conf.functions?.[functionName] ||
+          context.serverless.service.functions?.[functionName];
 
-        const func = context.serverless.service.functions[functionName];
         if (func === undefined) {
           context.plugin.log(`The ${functionName} function is not defined`, {
             color: 'orange',
@@ -114,24 +103,25 @@ export default function getAppSyncConfig(context, appSyncConfig) {
           return null;
         }
 
+        let url, method;
+        if (func.url) {
+          url = func.url;
+          method = func.method;
+        } else {
+          url = `http://localhost:${context.options.lambdaPort}/2015-03-31/functions/${func.name}/invocations`;
+        }
         return {
           ...dataSource,
-          invoke: (payload) =>
-            invoke({
-              packageFolder: path.join(
-                context.serverless.config.servicePath,
-                context.options.location,
-              ),
-              handler: func.handler,
-              event: JSON.stringify(payload),
-              environment: {
-                ...(context.options.lambda.loadLocalEnv === true
-                  ? process.env
-                  : {}),
-                ...context.serverless.service.provider.environment,
-                ...func.environment,
-              },
-            }),
+          invoke: async (payload) => {
+            const result = await axios.request({
+              url,
+              method: method || 'POST',
+              data: payload,
+              headers: payload.request?.headers,
+              validateStatus: false,
+            });
+            return result.data;
+          },
         };
       }
       case 'AMAZON_ELASTICSEARCH':

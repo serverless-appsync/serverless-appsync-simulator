@@ -45,6 +45,23 @@ class ServerlessAppSyncSimulator {
     }
   }
 
+  getLambdaPort(context) {
+    // Default serverless-offline lambdaPort is 3002
+    let port = 3002;
+    const offlineConfig = context.service.custom['serverless-offline'];
+    // Check if the user has defined a specific port as part of their serverless.yml
+    if (offlineConfig != undefined && offlineConfig.lambdaPort != undefined) {
+      port = offlineConfig.lambdaPort;
+    }
+    // Check to see if a port override was specified as part of the CLI arguments
+    const cliOptions = context.processedInput.options;
+    if (cliOptions != undefined && cliOptions.lambdaPort != undefined) {
+      port = cliOptions.lambdaPort;
+    }
+
+    return port;
+  }
+
   async startServers() {
     try {
       this.buildResolvedOptions();
@@ -80,6 +97,8 @@ class ServerlessAppSyncSimulator {
           name: this.serverless.service.custom.appSync.name,
         });
       }
+
+      this.options.lambdaPort = this.getLambdaPort(this.serverless);
 
       if (Array.isArray(this.options.watch) && this.options.watch.length > 0) {
         this.watch();
@@ -246,9 +265,6 @@ class ServerlessAppSyncSimulator {
         port: 20002,
         wsPort: 20003,
         location: '.',
-        lambda: {
-          loadLocalEnv: false,
-        },
         refMap: {},
         getAttMap: {},
         importValueMap: {},
