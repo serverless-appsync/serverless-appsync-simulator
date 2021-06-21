@@ -155,6 +155,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "seanvm",
+      "name": "Sean van Mulligen",
+      "avatar_url": "https://avatars.githubusercontent.com/u/16951595?v=4",
+      "profile": "https://vanmulligen.ca",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
