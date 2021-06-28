@@ -1,6 +1,6 @@
 {
   "name": "serverless-appsync-simulator",
-  "version": "0.6.0",
+  "version": "0.17.0",
   "main": "lib/index.js",
   "author": "bboure",
   "license": "MIT",
@@ -11,7 +11,9 @@
     "url": "git+https://github.com/bboure/serverless-appsync-simulator.git"
   },
   "scripts": {
-    "build": "babel src/ -d lib/ --delete-dir-on-start",
+    "lint": "eslint src/*/**.js",
+    "tests": "jest",
+    "build": "babel src/ -d lib/ --delete-dir-on-start --ignore '**/__tests__'",
     "prepare": "yarn run build",
     "start-dev": "yarn run build -w --verbose"
   },
@@ -19,27 +21,43 @@
     "/lib"
   ],
   "dependencies": {
-    "amplify-appsync-simulator": "1.23.0",
-    "amplify-nodejs-function-runtime-provider": "^1.1.2",
-    "aws-sdk": "^2.720.0",
-    "axios": "^0.19.2",
-    "cfn-resolver-lib": "^1.1.6",
+    "amplify-appsync-simulator": "^1.23.9",
+    "amplify-nodejs-function-runtime-provider": "^1.1.6",
+    "aws-sdk": "^2.792.0",
+    "axios": "^0.21.0",
+    "babel-jest": "^26.6.3",
+    "cfn-resolver-lib": "^1.1.7",
     "dataloader": "^2.0.0",
-    "lodash": "^4.17.19",
+    "fb-watchman": "^2.0.1",
+    "globby": "^11.0.3",
+    "jest": "^26.6.3",
+    "lodash": "^4.17.20",
     "merge-graphql-schemas": "^1.5.8"
   },
   "devDependencies": {
-    "@babel/cli": "^7.10.5",
-    "@babel/core": "^7.10.5",
-    "@babel/plugin-transform-modules-commonjs": "^7.10.4",
-    "@babel/preset-env": "^7.10.4",
+    "@babel/cli": "^7.12.1",
+    "@babel/core": "^7.12.3",
+    "@babel/plugin-transform-modules-commonjs": "^7.12.1",
+    "@babel/preset-env": "^7.12.1",
+    "@semantic-release/git": "^9.0.0",
+    "all-contributors-cli": "^6.19.0",
     "babel-eslint": "^10.1.0",
-    "eslint": "^7.5.0",
-    "eslint-config-airbnb-base": "^14.2.0",
-    "eslint-plugin-import": "^2.22.0",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-standard": "^4.0.1"
+    "babel-plugin-inline-import": "^3.0.0",
+    "eslint": "^7.13.0",
+    "eslint-config-prettier": "^7.0.0",
+    "eslint-plugin-prettier": "^3.2.0",
+    "prettier": "^2.2.1",
+    "semantic-release": "^17.3.0"
+  },
+  "release": {
+    "branch": "master",
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      "@semantic-release/npm",
+      "@semantic-release/git",
+      "@semantic-release/github"
+    ]
   },
   "keywords": [
     "serverless",
