@@ -66,7 +66,12 @@ Put options under `custom.appsync-simulator` in your `serverless.yml` file
 | dynamoDb.accessKeyId     | DEFAULT_ACCESS_KEY         | AWS Access Key ID to access DynamoDB                                                                                                                                                                 |
 | dynamoDb.secretAccessKey | DEFAULT_SECRET             | AWS Secret Key to access DynamoDB                                                                                                                                                                    |
 | dynamoDb.sessionToken    | DEFAULT_ACCESS_TOKEEN      | AWS Session Token to access DynamoDB, only if you have temporary security credentials configured on AWS                                                                                              |
-| dynamoDb.\*              |                            | You can add every configuration accepted by [DynamoDB SDK](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB.html#constructor-property)                                               |
+| rds.dbName               |                            | Name of the database                                                                                                                                                                                 |
+| rds.dbHost               |                            | Database host.                                                                                                                                                                                       |
+| rds.dbDialect            |                            | Database dialect. Possible values (mysql|postgres)                                                                                                                                                   |
+| rds.dbUsername           |                            | Database username                                                                                                                                                                                    |
+| rds.dbPassword           |                            | Database password                                                                                                                                                                                    |
+| rds.dbPort               |                            | Database port                                                                                                                                                                                        |
 | watch                    | - \*.graphql<br/> - \*.vtl | Array of glob patterns to watch for hot-reloading.                                                                                                                                                   |
 
 Example:
@@ -250,11 +255,68 @@ This plugin supports resolvers implemented by `amplify-appsync-simulator`, as we
 
 - AMAZON_ELASTIC_SEARCH
 - HTTP
-
-**Not Supported / TODO**
-
 - RELATIONAL_DATABASE
 
+## Relation Database
+### Sample VTL for a create mutation
+
+```
+#set( $cols = [] )
+#set( $vals = [] )
+#foreach( $entry in $ctx.args.input.keySet() )
+  #set( $discard = $cols.add("\\"$entry\\"") )
+  #if( $util.isBoolean($ctx.args.input[$entry]) )
+      #if( $ctx.args.input[$entry] )
+        #set( $discard = $vals.add("1") )
+      #else
+        #set( $discard = $vals.add("0") )
+      #end
+  #else
+      #set( $discard = $vals.add("'$ctx.args.input[$entry]'") )
+  #end
+#end
+
+#set( $valStr = $vals.toString().replace("[","(").replace("]",")") )
+#set( $colStr = $cols.toString().replace("[","(").replace("]",")") )
+
+#if ( $valStr.get(0) != "(" )
+  #set( $valStr = "($valStr)" )
+#end
+#if ( $colStr.get(0) != "(" )
+  #set( $colStr = "($colStr)" )
+#end
+{
+  "version": "2018-05-29",
+  "statements":   ["INSERT INTO notes $colStr VALUES $valStr", "SELECT * FROM notes ORDER BY id DESC LIMIT 1"]
+}
+```
+
+### Sample VTL for an update mutation
+```
+#set( $update = "" )
+#set( $equals = "=" )
+#foreach( $entry in $ctx.args.input.keySet() )
+
+   #set( $cur = $ctx.args.input[$entry] )
+   #if( $util.isBoolean($cur) )
+       #if( $cur )
+         #set ( $cur = "1" )
+       #else
+         #set ( $cur = "0" )
+       #end
+   #end
+   #if ( $util.isNullOrEmpty($update) )
+      #set($update = "$entry$equals'$cur'" )
+   #else
+      #set($update = "$update,$entry$equals'$cur'" )
+   #end
+#end
+
+{
+  "version": "2018-05-29",
+  "statements":   ["UPDATE notes SET $update WHERE id=$ctx.args.input.id", "SELECT * FROM notes WHERE id=$ctx.args.input.id"]
+}
+```
 ## Contributors ✨
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):

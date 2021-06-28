@@ -1,13 +1,14 @@
 import Sequelize from 'sequelize';
+import get from 'lodash/get'
+import Promise from 'bluebird'
 
-export default class ElasticDataLoader {
+export default class RelationalDataLoader {
   constructor(config) {
     this.config = config;
   }
 
   async load(req) {
     try {
-      console.log(req);
       const requiredKeys = [
         'dbDialect',
         'dbUsername',
@@ -27,9 +28,7 @@ export default class ElasticDataLoader {
       const config = {
         uri: `${this.config.rds.dbDialect}://${this.config.rds.dbUsername}:${this.config.rds.dbPassword}@${this.config.rds.dbHost}:${this.config.rds.dbPort}/${this.config.rds.dbName}`,
         options: {
-          host: process.env.DB_HOST,
           logging: console.log,
-          dialect: process.env.DB_DIALECT,
           dialectOptions: {
             decimalNumbers: true,
             multipleStatements: true,
@@ -40,27 +39,24 @@ export default class ElasticDataLoader {
           },
         },
       };
-      console.log(JSON.stringify(config));
+
       const sequelize = new Sequelize(config.uri, config.options);
-      let result;
-      result = await Promise.all(
-        req.statements.map((statement) => {
+      const result = await Promise.mapSeries(
+        req.statements,
+        (statement) => {
           return sequelize.query(statement);
-        }),
-      ).catch((err) => (result = err));
-      console.log(JSON.stringify(result));
-      if (Array.isArray(result) && result.length > 1) {
-        const length = result[0][1];
-        if (length === 1) {
-          return result[1][1].rows[0];
-        }
-        return result[1][1].rows;
+        },
+      );
+      
+      const rows = get(result, `[${req.statements.length - 1}][1].rows`, null)
+      const length = rows?.length;
+      if (length === 1) {
+        return rows[0];
       }
-      return result;
+      return rows;
     } catch (e) {
       console.log(e);
+      return e;
     }
-
-    return null;
   }
 }
