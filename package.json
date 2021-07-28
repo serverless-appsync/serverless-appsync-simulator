@@ -21,18 +21,21 @@
     "/lib"
   ],
   "dependencies": {
-    "amplify-appsync-simulator": "^1.23.9",
+    "amplify-appsync-simulator": "^1.27.4",
     "amplify-nodejs-function-runtime-provider": "^1.1.6",
     "aws-sdk": "^2.792.0",
     "axios": "^0.21.0",
     "babel-jest": "^26.6.3",
+    "bluebird": "^3.7.2",
     "cfn-resolver-lib": "^1.1.7",
     "dataloader": "^2.0.0",
     "fb-watchman": "^2.0.1",
     "globby": "^11.0.3",
     "jest": "^26.6.3",
     "lodash": "^4.17.20",
-    "merge-graphql-schemas": "^1.5.8"
+    "merge-graphql-schemas": "^1.5.8",
+    "mysql2": "^2.2.5",
+    "pg": "^8.6.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.12.1",
