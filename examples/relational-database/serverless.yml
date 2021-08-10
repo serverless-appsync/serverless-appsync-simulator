@@ -1,0 +1,77 @@
+service: mapping-templates
+useDotenv: true
+provider:
+    name: aws
+    region: eu-west-1
+
+plugins:
+    - serverless-offline
+    - serverless-appsync-simulator
+    - serverless-appsync-plugin
+
+custom:
+    appsync-simulator:
+        relational-databases:
+            MyRDS:
+                config: 
+                    client: pg
+                    version: 7.2
+                    host: localhost
+                    port: 5432
+                    user: postgres
+                    password: postgres
+                    database: local
+    appSync:
+        name: Test
+        schema: schema.graphql
+        authenticationType: AWS_IAM
+        mappingTemplatesLocation: mapping-templates
+        mappingTemplates:
+            - dataSource: MyRDS
+              type: Query
+              field: getPosts
+              request: Query.getPosts.request.vtl
+              response: Query.getPosts.response.vtl
+        dataSources:
+            - type: RELATIONAL_DATABASE
+              name: MyRDS
+              config:
+                dbClusterIdentifier: ${env:RDS_CLUSTER_ID}
+                awsSecretStoreArn: ${env:RDS_SECRET_STORE}
+                serviceRoleArn: { Fn::GetAtt: [AppSyncRDSServiceRole, Arn] }
+                databaseName: ${env:RDS_CLUSTER_NAME}
+
+resources:
+  Resources:
+    AppSyncRDSServiceRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: AppSync-RDS-Service-Role-${self:provider.stage}
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: appsync.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: AppSync-RDS-Service-Role-Policy-${self:provider.stage}
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - rds-data:ExecuteStatement
+                    - rds-data:DeleteItems
+                    - rds-data:ExecuteSql
+                    - rds-data:GetItems
+                    - rds-data:InsertItems
+                    - rds-data:UpdateItems
+                  Resource:
+                    - arn:aws:rds:${self:provider.region}:#{AWS::AccountId}:cluster:${env:RDS_CLUSTER_ID}
+                    - arn:aws:rds:${self:provider.region}:#{AWS::AccountId}:cluster:${env:RDS_CLUSTER_ID}:*
+                - Effect: Allow
+                  Action: secretsmanager:GetSecretValue
+                  Resource:
+                    - ${env:RDS_SECRET_STORE}
+                    - ${env:RDS_SECRET_STORE}:*
