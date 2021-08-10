@@ -6,10 +6,10 @@ import { inspect } from 'util';
 import { defaults, get, merge, reduce } from 'lodash';
 import NodeEvaluator from 'cfn-resolver-lib';
 import getAppSyncConfig from './getAppSyncConfig';
-import NotImplementedDataLoader from './data-loaders/NotImplementedDataLoader';
 import ElasticDataLoader from './data-loaders/ElasticDataLoader';
 import HttpDataLoader from './data-loaders/HttpDataLoader';
 import watchman from 'fb-watchman';
+import SQLDataLoader from './data-loaders/SQLDataLoader';
 
 const resolverPathMap = {
   'AWS::DynamoDB::Table': 'Properties.TableName',
@@ -27,7 +27,7 @@ class ServerlessAppSyncSimulator {
 
     addDataLoader('HTTP', HttpDataLoader);
     addDataLoader('AMAZON_ELASTICSEARCH', ElasticDataLoader);
-    addDataLoader('RELATIONAL_DATABASE', NotImplementedDataLoader);
+    addDataLoader('RELATIONAL_DATABASE', SQLDataLoader);
 
     this.hooks = {
       'before:offline:start:init': this.startServers.bind(this),
