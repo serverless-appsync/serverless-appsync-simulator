@@ -67,6 +67,12 @@ Put options under `custom.appsync-simulator` in your `serverless.yml` file
 | dynamoDb.secretAccessKey | DEFAULT_SECRET             | AWS Secret Key to access DynamoDB                                                                                                                                                                    |
 | dynamoDb.sessionToken    | DEFAULT_ACCESS_TOKEEN      | AWS Session Token to access DynamoDB, only if you have temporary security credentials configured on AWS                                                                                              |
 | dynamoDb.\*              |                            | You can add every configuration accepted by [DynamoDB SDK](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB.html#constructor-property)                                               |
+| rds.dbName               |                            | Name of the database                                                                                                                                                                                 |
+| rds.dbHost               |                            | Database host                                                                                                                                                                                        |
+| rds.dbDialect            |                            | Database dialect. Possible values (mysql|postgres)                                                                                                                                                   |
+| rds.dbUsername           |                            | Database username                                                                                                                                                                                    |
+| rds.dbPassword           |                            | Database password                                                                                                                                                                                    |
+| rds.dbPort               |                            | Database port                                                                                                                                                                                        |
 | watch                    | - \*.graphql<br/> - \*.vtl | Array of glob patterns to watch for hot-reloading.                                                                                                                                                   |
 
 Example:
@@ -250,10 +256,115 @@ This plugin supports resolvers implemented by `amplify-appsync-simulator`, as we
 
 - AMAZON_ELASTIC_SEARCH
 - HTTP
-
-**Not Supported / TODO**
-
 - RELATIONAL_DATABASE
+
+## Relational Database
+### Sample VTL for a create mutation
+
+```
+#set( $cols = [] )
+#set( $vals = [] )
+#foreach( $entry in $ctx.args.input.keySet() )
+  #set( $regex = "([a-z])([A-Z]+)")
+  #set( $replacement = "$1_$2")
+  #set( $toSnake = $entry.replaceAll($regex, $replacement).toLowerCase() )
+  #set( $discard = $cols.add("$toSnake") )
+  #if( $util.isBoolean($ctx.args.input[$entry]) )
+      #if( $ctx.args.input[$entry] )
+        #set( $discard = $vals.add("1") )
+      #else
+        #set( $discard = $vals.add("0") )
+      #end
+  #else
+      #set( $discard = $vals.add("'$ctx.args.input[$entry]'") )
+  #end
+#end
+#set( $valStr = $vals.toString().replace("[","(").replace("]",")") )
+#set( $colStr = $cols.toString().replace("[","(").replace("]",")") )
+#if ( $valStr.substring(0, 1) != '(' )
+  #set( $valStr = "($valStr)" )
+#end
+#if ( $colStr.substring(0, 1) != '(' )
+  #set( $colStr = "($colStr)" )
+#end
+{
+  "version": "2018-05-29",
+  "statements":   ["INSERT INTO <name-of-table> $colStr VALUES $valStr", "SELECT * FROM    <name-of-table> ORDER BY id DESC LIMIT 1"]
+}
+```
+
+### Sample VTL for an update mutation
+```
+#set( $update = "" )
+#set( $equals = "=" )
+#foreach( $entry in $ctx.args.input.keySet() )
+  #set( $cur = $ctx.args.input[$entry] )
+  #set( $regex = "([a-z])([A-Z]+)")
+  #set( $replacement = "$1_$2")
+  #set( $toSnake = $entry.replaceAll($regex, $replacement).toLowerCase() )
+  #if( $util.isBoolean($cur) )
+      #if( $cur )
+        #set ( $cur = "1" )
+      #else
+        #set ( $cur = "0" )
+      #end
+  #end
+  #if ( $util.isNullOrEmpty($update) )
+      #set($update = "$toSnake$equals'$cur'" )
+  #else
+      #set($update = "$update,$toSnake$equals'$cur'" )
+  #end
+#end
+{
+  "version": "2018-05-29",
+  "statements":   ["UPDATE <name-of-table> SET $update WHERE id=$ctx.args.input.id", "SELECT * FROM <name-of-table> WHERE id=$ctx.args.input.id"]
+}
+```
+
+
+### Sample resolver for delete mutation
+```
+{
+  "version": "2018-05-29",
+  "statements":   ["UPDATE <name-of-table> set deleted_at=NOW() WHERE id=$ctx.args.id", "SELECT * FROM <name-of-table> WHERE id=$ctx.args.id"]
+}
+```
+
+### Sample mutation response VTL with support for handling AWSDateTime
+```
+#set ( $index = -1)
+#set ( $result = $util.parseJson($ctx.result) )
+#set ( $meta = $result.sqlStatementResults[1].columnMetadata)
+#foreach ($column in $meta)
+    #set ($index = $index + 1)
+    #if ( $column["typeName"] == "timestamptz" )
+        #set ($time = $result["sqlStatementResults"][1]["records"][0][$index]["stringValue"] )
+        #set ( $nowEpochMillis = $util.time.parseFormattedToEpochMilliSeconds("$time.substring(0,19)+0000", "yyyy-MM-dd HH:mm:ssZ") )
+        #set ( $isoDateTime = $util.time.epochMilliSecondsToISO8601($nowEpochMillis) )
+        $util.qr( $result["sqlStatementResults"][1]["records"][0][$index].put("stringValue", "$isoDateTime") )
+    #end   
+#end
+#set ( $res = $util.parseJson($util.rds.toJsonString($util.toJson($result)))[1][0] )
+#set ( $response = {} )
+#foreach($mapKey in $res.keySet())
+    #set ( $s = $mapKey.split("_") )
+    #set ( $camelCase="" )
+    #set ( $isFirst=true )
+    #foreach($entry in $s)
+        #if ( $isFirst )
+          #set ( $first = $entry.substring(0,1) )
+        #else
+          #set ( $first = $entry.substring(0,1).toUpperCase() )
+        #end
+        #set ( $isFirst=false )
+        #set ( $stringLength = $entry.length() )
+        #set ( $remaining = $entry.substring(1, $stringLength) )
+        #set ( $camelCase = "$camelCase$first$remaining" )
+    #end
+    $util.qr( $response.put("$camelCase", $res[$mapKey]) )
+#end
+$utils.toJson($response)
+```
 
 ## Contributors ✨
 

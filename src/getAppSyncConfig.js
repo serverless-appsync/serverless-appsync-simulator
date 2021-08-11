@@ -82,6 +82,12 @@ export default function getAppSyncConfig(context, appSyncConfig) {
           },
         };
       }
+      case 'RELATIONAL_DATABASE': {
+        return {
+          ...dataSource,
+          rds: context.options.rds,
+        };
+      }
       case 'AWS_LAMBDA': {
         const { functionName } = source.config;
         if (functionName === undefined) {
