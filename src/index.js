@@ -9,6 +9,7 @@ import getAppSyncConfig from './getAppSyncConfig';
 import NotImplementedDataLoader from './data-loaders/NotImplementedDataLoader';
 import ElasticDataLoader from './data-loaders/ElasticDataLoader';
 import HttpDataLoader from './data-loaders/HttpDataLoader';
+import RelationalDataLoader from './data-loaders/RelationalDataLoader';
 import watchman from 'fb-watchman';
 
 const resolverPathMap = {
@@ -27,7 +28,7 @@ class ServerlessAppSyncSimulator {
 
     addDataLoader('HTTP', HttpDataLoader);
     addDataLoader('AMAZON_ELASTICSEARCH', ElasticDataLoader);
-    addDataLoader('RELATIONAL_DATABASE', NotImplementedDataLoader);
+    addDataLoader('RELATIONAL_DATABASE', RelationalDataLoader);
 
     this.hooks = {
       'before:offline:start:init': this.startServers.bind(this),
@@ -268,6 +269,7 @@ class ServerlessAppSyncSimulator {
         refMap: {},
         getAttMap: {},
         importValueMap: {},
+        rds: {},
         dynamoDb: {
           endpoint: `http://localhost:${get(
             this.serverless.service,
