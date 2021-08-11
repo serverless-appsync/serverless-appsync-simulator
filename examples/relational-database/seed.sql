@@ -1,6 +1,6 @@
 CREATE TABLE posts (
   id INT PRIMARY KEY NOT NULL,
-  user_id INT NOT NULL
+  user_id INT NOT NULL,
   title TEXT NOT NULL,
   body TEXT NOT NULL
 );

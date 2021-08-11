@@ -6,7 +6,7 @@
   "scripts": {
     "offline": "sls offline start",
     "db:start": "docker compose up -d",
-    "db:seed": "docker compose exec db psql -U postgres -d local -a -f './seed.sql'"
+    "db:seed": "./seed.sh"
   },
   "dependencies": {
     "serverless-appsync-plugin": "^1.3.1",
