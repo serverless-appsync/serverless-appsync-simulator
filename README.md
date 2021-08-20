@@ -366,6 +366,22 @@ This plugin supports resolvers implemented by `amplify-appsync-simulator`, as we
 $utils.toJson($response)
 ```
 
+### Using Variable Map
+Variable map support is limited and does not differentiate numbers and strings data types, please inject them directly if needed.
+
+```
+{
+  "version": "2018-05-29",
+  "statements":   [
+    "UPDATE <name-of-table> set deleted_at=NOW() WHERE id=:ID", 
+    "SELECT * FROM <name-of-table> WHERE id=:ID and unix_timestamp > $ctx.args.newerThan"
+  ],
+  variableMap: {
+    ":ID": $ctx.args.id
+  }
+}
+```
+
 ## Contributors ✨
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
