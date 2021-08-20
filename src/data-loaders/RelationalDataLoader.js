@@ -53,6 +53,27 @@ const convertMySQLResponseToColumnMetaData = (rows) => {
   });
 };
 
+const convertSQLResponseToRDSRecords = (rows) => {
+  const records = [];
+
+  rows.forEach((dbObject) => {
+    const record = [];
+    Object.keys(dbObject).forEach((key) => {
+      record.push(
+        dbObject[key] === null
+          ? { isNull: true, null: true }
+          : typeof dbObject[key] === 'string'
+          ? { stringValue: dbObject[key] }
+          : typeof dbObject[key] === 'number'
+          ? { longValue: dbObject[key] }
+          : { stringValue: dbObject[key] },
+      );
+    });
+    records.push(record);
+  });
+  return records;
+};
+
 const convertPostgresSQLResponseToColumnMetaData = (rows) => {
   return rows.map((row) => {
     const typeName = Object.keys(pgTypes.builtins)
@@ -77,27 +98,6 @@ const convertPostgresSQLResponseToColumnMetaData = (rows) => {
       typeName: typeName ? typeName.toUpperCase() : "UNKOWN"
     };
   });
-};
-
-const convertSQLResponseToRDSRecords = (rows) => {
-  const records = [];
-
-  rows.forEach((dbObject) => {
-    const record = [];
-    Object.keys(dbObject).forEach((key) => {
-      record.push(
-        dbObject[key] === null
-          ? { isNull: true, null: true }
-          : typeof dbObject[key] === 'string'
-          ? { stringValue: dbObject[key] }
-          : typeof dbObject[key] === 'number'
-          ? { longValue: dbObject[key] }
-          : { stringValue: dbObject[key] },
-      );
-    });
-    records.push(record);
-  });
-  return records;
 };
 
 const injectVariables = (statement, variableMap) => {
