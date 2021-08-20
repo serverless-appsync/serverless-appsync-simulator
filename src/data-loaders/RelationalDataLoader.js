@@ -170,7 +170,6 @@ export default class RelationalDataLoader {
               generatedFields: [],
             };
           }
-
           return {
             numberOfRecordsUpdated: result[0].length,
             records: convertSQLResponseToRDSRecords(result[0]),
@@ -194,6 +193,7 @@ export default class RelationalDataLoader {
       }
       return JSON.stringify(res);
     } catch (e) {
+      console.log(e);
       return e;
     }
   }
