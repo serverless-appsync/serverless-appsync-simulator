@@ -140,7 +140,7 @@ export default class RelationalDataLoader {
       if (!this.config.rds) {
         throw new Error('RDS configuration not passed');
       }
-      const missingKey = requiredKeys.find(key => {
+      const missingKey = requiredKeys.find((key) => {
         return !this.config.rds[key];
       });
       if (missingKey) {
@@ -155,12 +155,11 @@ export default class RelationalDataLoader {
         port: this.config.rds.dbPort,
       };
       const res = {};
-
       if (this.config.rds.dbDialect === 'mysql') {
         const client = await mysql.createConnection(dbConfig);
         const results = await executeSqlStatements(client, req);
 
-        res.sqlStatementResults = results.map(result => {
+        res.sqlStatementResults = results.map((result) => {
           if (result.length < 2) {
             return {};
           }
@@ -193,11 +192,9 @@ export default class RelationalDataLoader {
           };
         });
       }
-
       return JSON.stringify(res);
     } catch (e) {
       return e;
     }
   }
-
 }
