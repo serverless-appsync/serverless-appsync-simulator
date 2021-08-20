@@ -2,7 +2,6 @@ import Promise from 'bluebird';
 import { Client, types as pgTypes } from 'pg';
 import mysql from 'mysql2/promise';
 import { Types } from 'mysql2';
-
 const FLAGS = {
   NOT_NULL: 1,
   PRI_KEY: 2,
@@ -52,7 +51,6 @@ const convertMySQLResponseToColumnMetaData = (rows) => {
     };
   });
 };
-
 const convertSQLResponseToRDSRecords = (rows) => {
   const records = [];
 
@@ -95,7 +93,7 @@ const convertPostgresSQLResponseToColumnMetaData = (rows) => {
       label: row.name,
       name: row.name,
       type: row.dataTypeID,
-      typeName: typeName ? typeName.toUpperCase() : "UNKOWN"
+      typeName: typeName ? typeName.toUpperCase() : "UNKOWN",
     };
   });
 };
@@ -142,11 +140,9 @@ export default class RelationalDataLoader {
       if (!this.config.rds) {
         throw new Error('RDS configuration not passed');
       }
-
       const missingKey = requiredKeys.find(key => {
         return !this.config.rds[key];
       });
-
       if (missingKey) {
         throw new Error(`${missingKey} is required.`);
       }
@@ -156,29 +152,29 @@ export default class RelationalDataLoader {
         user: this.config.rds.dbUsername,
         password: this.config.rds.dbPassword,
         database: this.config.rds.dbName,
-        port: this.config.rds.dbPort
+        port: this.config.rds.dbPort,
       };
       const res = {};
 
       if (this.config.rds.dbDialect === 'mysql') {
         const client = await mysql.createConnection(dbConfig);
         const results = await executeSqlStatements(client, req);
+
         res.sqlStatementResults = results.map(result => {
           if (result.length < 2) {
             return {};
           }
-
           if (!result[1]) {
             // not a select query
             return {
               numberOfRecordsUpdated: result[0].affectedRows,
-              generatedFields: []
+              generatedFields: [],
             };
           }
 
           return {
             numberOfRecordsUpdated: result[0].length,
-            records: convertSQLResponseToRDSRecords(result[0].rows),
+            records: convertSQLResponseToRDSRecords(result[0]),
             columnMetadata: convertMySQLResponseToColumnMetaData(result[1]),
           };
         });
@@ -190,7 +186,9 @@ export default class RelationalDataLoader {
           return {
             numberOfRecordsUpdated: result.rowCount,
             records: convertSQLResponseToRDSRecords(result.rows),
-            columnMetadata: convertPostgresSQLResponseToColumnMetaData(result.fields),
+            columnMetadata: convertPostgresSQLResponseToColumnMetaData(
+              result.fields,
+            ),
             generatedFields: [],
           };
         });
