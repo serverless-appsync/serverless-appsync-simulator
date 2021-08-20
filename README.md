@@ -369,6 +369,8 @@ $utils.toJson($response)
 ### Using Variable Map
 Variable map support is limited and does not differentiate numbers and strings data types, please inject them directly if needed.
 
+Will be escaped properly: `null`, `true`, and `false` values.
+
 ```
 {
   "version": "2018-05-29",
@@ -377,7 +379,8 @@ Variable map support is limited and does not differentiate numbers and strings d
     "SELECT * FROM <name-of-table> WHERE id=:ID and unix_timestamp > $ctx.args.newerThan"
   ],
   variableMap: {
-    ":ID": $ctx.args.id
+    ":ID": $ctx.args.id,
+##    ":TIMESTAMP": $ctx.args.newerThan -- This will be handled as a string!!!
   }
 }
 ```
