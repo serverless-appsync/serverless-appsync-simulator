@@ -74,8 +74,9 @@ const convertSQLResponseToRDSRecords = (rows) => {
 
 const convertPostgresSQLResponseToColumnMetaData = (rows) => {
   return rows.map((row) => {
-    const typeName = Object.keys(pgTypes.builtins)
-      .find((d) => pgTypes.builtins[d] === row.dataTypeID);
+    const typeName = Object.keys(pgTypes.builtins).find(
+      (d) => pgTypes.builtins[d] === row.dataTypeID,
+    );
     // @TODO: Add support for the following fields
     // isAutoIncrement,
     // nullable,
@@ -93,34 +94,39 @@ const convertPostgresSQLResponseToColumnMetaData = (rows) => {
       label: row.name,
       name: row.name,
       type: row.dataTypeID,
-      typeName: typeName ? typeName.toUpperCase() : "UNKOWN",
+      typeName: typeName ? typeName.toUpperCase() : 'UNKOWN',
     };
   });
 };
 
 const injectVariables = (statement, variableMap) => {
   const result = Object.keys(variableMap).reduce((statmnt, key) => {
-    if(variableMap[key] === null || variableMap[key] === false || variableMap[key] === true) {
-      return statmnt.replace(key, `${variableMap[key]}`)  
+    if (
+      variableMap[key] === null ||
+      variableMap[key] === false ||
+      variableMap[key] === true
+    ) {
+      return statmnt.replace(key, `${variableMap[key]}`);
     }
     // @TODO: Differentiate number from string inputs...
-    return statmnt.replace(key, `'${variableMap[key]}'`)
-  }, statement)
-  return result
-}
+    return statmnt.replace(key, `'${variableMap[key]}'`);
+  }, statement);
+  return result;
+};
 
-const executeSqlStatements = async (client, req) => Promise.mapSeries(req.statements, async (statement) => {
-  if (req.variableMap) {
-    statement = injectVariables(statement, req.variableMap);
-  } 
-  try {
-    const result = await client.query(statement);
-    return result;
-  } catch (error) {
-    console.log(`RDS_DATALOADER: Failed to execute: `, statement, error)
-    throw(e);
-  }
-});
+const executeSqlStatements = async (client, req) =>
+  Promise.mapSeries(req.statements, async (statement) => {
+    if (req.variableMap) {
+      statement = injectVariables(statement, req.variableMap);
+    }
+    try {
+      const result = await client.query(statement);
+      return result;
+    } catch (error) {
+      console.log(`RDS_DATALOADER: Failed to execute: `, statement, error);
+      throw e;
+    }
+  });
 
 export default class RelationalDataLoader {
   constructor(config) {
