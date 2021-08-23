@@ -95,7 +95,7 @@ const convertPostgresSQLResponseToColumnMetaData = (rows) => {
       label: row.name,
       name: row.name,
       type: row.dataTypeID,
-      typeName: typeName,
+      typeName,
     };
   });
 };
