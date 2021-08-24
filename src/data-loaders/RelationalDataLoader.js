@@ -102,7 +102,7 @@ const convertPostgresSQLResponseToColumnMetaData = (rows) => {
 
 const injectVariables = (statement, req) => {
   const { variableMap } = req;
-  if (variableMap) {
+  if (!variableMap) {
     return statement;
   }
   const result = Object.keys(variableMap).reduce((statmnt, key) => {
@@ -117,7 +117,7 @@ const injectVariables = (statement, req) => {
 
 const executeSqlStatements = async (client, req) =>
   Promise.mapSeries(req.statements, async (statement) => {
-    statement = injectVariables(statement, req.variableMap);
+    statement = injectVariables(statement, req);
     try {
       const result = await client.query(statement);
       return result;
