@@ -106,7 +106,7 @@ const injectVariables = (statement, req) => {
     return statement;
   }
   const result = Object.keys(variableMap).reduce((statmnt, key) => {
-    // Adds "g" for replaceAll effect
+    // Adds 'g' for replaceAll effect
     var re = new RegExp(key, "g");
     if (variableMap[key] === null || typeof variableMap[key] == 'boolean') {
       return statmnt.replace(re, `${variableMap[key]}`);
