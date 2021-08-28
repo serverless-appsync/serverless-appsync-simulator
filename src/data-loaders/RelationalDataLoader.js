@@ -107,7 +107,7 @@ const injectVariables = (statement, req) => {
   }
   const result = Object.keys(variableMap).reduce((statmnt, key) => {
     if (variableMap[key] === null || typeof variableMap[key] == 'boolean') {
-      return statmnt.replace(key, `${variableMap[key]}`);
+      return statmnt.replaceAll(key, `${variableMap[key]}`);
     }
     // @TODO: Differentiate number from string inputs...
     return statmnt.replaceAll(key, `'${variableMap[key]}'`);
