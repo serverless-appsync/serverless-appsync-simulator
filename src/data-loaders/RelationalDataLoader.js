@@ -106,11 +106,13 @@ const injectVariables = (statement, req) => {
     return statement;
   }
   const result = Object.keys(variableMap).reduce((statmnt, key) => {
+    // Adds 'g' for replaceAll effect
+    var re = new RegExp(key, 'g');
     if (variableMap[key] === null || typeof variableMap[key] == 'boolean') {
-      return statmnt.replaceAll(key, `${variableMap[key]}`);
+      return statmnt.replace(re, `${variableMap[key]}`);
     }
     // @TODO: Differentiate number from string inputs...
-    return statmnt.replaceAll(key, `'${variableMap[key]}'`);
+    return statmnt.replace(re, `'${variableMap[key]}'`);
   }, statement);
   return result;
 };
