@@ -21,7 +21,7 @@
     "/lib"
   ],
   "dependencies": {
-    "amplify-appsync-simulator": "git+https://github.com/returnmates/amplify-appsync-simulator",
+    "amplify-appsync-simulator": "^1.27.4",
     "amplify-nodejs-function-runtime-provider": "^1.1.6",
     "aws-sdk": "^2.792.0",
     "axios": "^0.21.0",
