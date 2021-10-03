@@ -177,7 +177,7 @@ export default class RelationalDataLoader {
 
   async load(req) {
     try {
-      const client = this.client;
+      const client = await this.getClient();
       const res = {};
       const results = await executeSqlStatements(client, req);
       if (this.config.rds.dbDialect === 'mysql') {
