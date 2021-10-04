@@ -74,9 +74,10 @@ const convertSQLResponseToRDSRecords = (rows) => {
 
 const convertPostgresSQLResponseToColumnMetaData = (rows) => {
   return rows.map((row) => {
-    const typeName = Object.keys(pgTypes.builtins)
-      .find((d) => pgTypes.builtins[d] === row.dataTypeID)
-      .toUpperCase();
+    const typeName =
+      Object.keys(pgTypes.builtins).find(
+        (d) => pgTypes.builtins[d] === row.dataTypeID,
+      ) ?? 'UNKNOWN';
     // @TODO: Add support for the following fields
     // isAutoIncrement,
     // nullable,
@@ -98,8 +99,36 @@ const convertPostgresSQLResponseToColumnMetaData = (rows) => {
     };
   });
 };
+
+const injectVariables = (statement, req) => {
+  const { variableMap } = req;
+  if (!variableMap) {
+    return statement;
+  }
+  const result = Object.keys(variableMap).reduce((statmnt, key) => {
+    // Adds 'g' for replaceAll effect
+    var re = new RegExp(key, 'g');
+    if (variableMap[key] === null || typeof variableMap[key] == 'boolean') {
+      return statmnt.replace(re, `${variableMap[key]}`);
+    }
+    // @TODO: Differentiate number from string inputs...
+    return statmnt.replace(re, `'${variableMap[key]}'`);
+  }, statement);
+  return result;
+};
+
 const executeSqlStatements = async (client, req) =>
-  Promise.mapSeries(req.statements, (statement) => client.query(statement));
+  Promise.mapSeries(req.statements, async (statement) => {
+    statement = injectVariables(statement, req);
+    try {
+      const result = await client.query(statement);
+      return result;
+    } catch (error) {
+      console.log(`RDS_DATALOADER: Failed to execute: `, statement, error);
+      throw error;
+    }
+  });
+
 export default class RelationalDataLoader {
   constructor(config) {
     this.config = config;
@@ -132,7 +161,6 @@ export default class RelationalDataLoader {
         database: this.config.rds.dbName,
         port: this.config.rds.dbPort,
       };
-
       const res = {};
       if (this.config.rds.dbDialect === 'mysql') {
         const client = await mysql.createConnection(dbConfig);
