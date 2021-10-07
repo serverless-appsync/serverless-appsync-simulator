@@ -132,40 +132,55 @@ const executeSqlStatements = async (client, req) =>
 export default class RelationalDataLoader {
   constructor(config) {
     this.config = config;
+    this.client = null;
+  }
+
+  async getClient() {
+    if (this.client) {
+      return this.client;
+    }
+
+    const requiredKeys = [
+      'dbDialect',
+      'dbUsername',
+      'dbPassword',
+      'dbHost',
+      'dbName',
+      'dbPort',
+    ];
+    if (!this.config.rds) {
+      throw new Error('RDS configuration not passed');
+    }
+    const missingKey = requiredKeys.find((key) => {
+      return !this.config.rds[key];
+    });
+    if (missingKey) {
+      throw new Error(`${missingKey} is required.`);
+    }
+
+    const dbConfig = {
+      host: this.config.rds.dbHost,
+      user: this.config.rds.dbUsername,
+      password: this.config.rds.dbPassword,
+      database: this.config.rds.dbName,
+      port: this.config.rds.dbPort,
+    };
+    const res = {};
+    if (this.config.rds.dbDialect === 'mysql') {
+      this.client = await mysql.createConnection(dbConfig);
+    } else if (this.config.rds.dbDialect === 'postgres') {
+      this.client = new Client(dbConfig);
+      await this.client.connect();
+    }
+    return this.client;
   }
 
   async load(req) {
     try {
-      const requiredKeys = [
-        'dbDialect',
-        'dbUsername',
-        'dbPassword',
-        'dbHost',
-        'dbName',
-        'dbPort',
-      ];
-      if (!this.config.rds) {
-        throw new Error('RDS configuration not passed');
-      }
-      const missingKey = requiredKeys.find((key) => {
-        return !this.config.rds[key];
-      });
-      if (missingKey) {
-        throw new Error(`${missingKey} is required.`);
-      }
-
-      const dbConfig = {
-        host: this.config.rds.dbHost,
-        user: this.config.rds.dbUsername,
-        password: this.config.rds.dbPassword,
-        database: this.config.rds.dbName,
-        port: this.config.rds.dbPort,
-      };
+      const client = await this.getClient();
       const res = {};
+      const results = await executeSqlStatements(client, req);
       if (this.config.rds.dbDialect === 'mysql') {
-        const client = await mysql.createConnection(dbConfig);
-        const results = await executeSqlStatements(client, req);
-
         res.sqlStatementResults = results.map((result) => {
           if (result.length < 2) {
             return {};
@@ -184,9 +199,6 @@ export default class RelationalDataLoader {
           };
         });
       } else if (this.config.rds.dbDialect === 'postgres') {
-        const client = new Client(dbConfig);
-        await client.connect();
-        const results = await executeSqlStatements(client, req);
         res.sqlStatementResults = results.map((result) => {
           return {
             numberOfRecordsUpdated: result.rowCount,
