@@ -1,5 +1,5 @@
 [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release) ![Release](https://github.com/bboure/serverless-appsync-simulator/workflows/Release/badge.svg) <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-18-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-19-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 This serverless plugin is a wrapper for [amplify-appsync-simulator](https://github.com/aws-amplify/amplify-cli/tree/master/packages/amplify-appsync-simulator) made for testing AppSync APIs built with [serverless-appsync-plugin](https://github.com/sid88in/serverless-appsync-plugin).
@@ -416,6 +416,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="http://aleksac.me"><img src="https://avatars.githubusercontent.com/u/25728391?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Aleksa Cukovic</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=AleksaC" title="Code">💻</a></td>
     <td align="center"><a href="https://vanmulligen.ca"><img src="https://avatars.githubusercontent.com/u/16951595?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Sean van Mulligen</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=seanvm" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/katesclau"><img src="https://avatars.githubusercontent.com/u/5067149?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Diego Rodrigues Ferreira</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=katesclau" title="Code">💻</a></td>
+    <td align="center"><a href="https://www.wednesday.is/"><img src="https://avatars.githubusercontent.com/u/4958010?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Mohammed Ali Chherawalla</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=alichherawalla" title="Code">💻</a></td>
   </tr>
 </table>
 
