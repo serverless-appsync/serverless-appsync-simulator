@@ -123,7 +123,7 @@ export default function getAppSyncConfig(context, appSyncConfig) {
               url,
               method: method || 'POST',
               data: payload,
-              headers: payload.request?.headers,
+              headers: payload?.request?.headers,
               validateStatus: false,
             });
             return result.data;
