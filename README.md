@@ -1,3 +1,14 @@
+Basé sur le projet :
+Car il ne nous permettait pas de faire en local un "BatchGetItem" via Appsync et DynamoDB
+
+
+### Objectif
+
+Le seul changement que nous avons apporté dans ce fork est de changer la version de la dépendance `amplify-appsync-simulator` qui un sous package de `amplify-cli` afin de le remplacer par une version supportant l'opération `BatchGetItem` au sein d'AppSync (Disponible ici : https://github.com/giraudvalentin/amplify-appsync-simulator-with-BatchGetItem)
+
+### Original README
+
+
 [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release) ![Release](https://serverless-appsync/serverless-appsync-simulator/workflows/Release/badge.svg) <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-20-orange.svg?style=flat-square)](#contributors-)
 
@@ -119,31 +130,14 @@ Note: Functions should not require hot-reloading, unless you are using a transpi
 This plugin supports _some_ resources resolution from the `Ref`, `Fn::GetAtt` and `Fn::ImportValue` functions
 in your yaml file. It also supports _some_ other Cfn functions such as `Fn::Join`, `Fb::Sub`, etc.
 
-**Note:** Under the hood, this features relies on the [cfn-resolver-lib](https://github.com/robessog/cfn-resolver-lib) package. For more info on supported cfn functions, refer to [the documentation](https://github.com/robessog/cfn-resolver-lib/blob/master/README.md)
 
-## Basic usage
+### Objectif
 
-You can reference resources in your functions' environment variables (that will be accessible from your lambda functions) or datasource definitions.
-The plugin will automatically resolve them for you.
+Le seul changement que nous avons apporté dans ce fork est de changer la version de la dépendance `amplify-appsync-simulator` qui un sous package de `amplify-cli` afin de le remplacer par une version supportant l'opération `BatchGetItem` au sein d'AppSync (Disponible ici : https://github.com/giraudvalentin/amplify-appsync-simulator-with-BatchGetItem)
 
-```yaml
-provider:
-  environment:
-    BUCKET_NAME:
-      Ref: MyBucket # resolves to `my-bucket-name`
+### Changement
 
-resources:
-  Resources:
-    MyDbTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: myTable
-      ...
-    MyBucket:
-      Type: AWS::S3::Bucket
-      Properties:
-        BucketName: my-bucket-name
-    ...
+Les commits de modifications :
 
 # in your appsync config
 dataSources:
