@@ -6,6 +6,11 @@ Car il ne nous permettait pas de faire en local un "BatchGetItem" via Appsync et
 
 Le seul changement que nous avons apporté dans ce fork est de changer la version de la dépendance `amplify-appsync-simulator` qui un sous package de `amplify-cli` afin de le remplacer par une version supportant l'opération `BatchGetItem` au sein d'AppSync (Disponible ici : https://github.com/giraudvalentin/amplify-appsync-simulator-with-BatchGetItem)
 
+Les commits de modifications :
+- 7df03530b8facd6a42a3ac62d59c3c39e0727a7b
+
+
+
 ### Original README
 
 
@@ -141,11 +146,11 @@ Les commits de modifications :
 
 # in your appsync config
 dataSources:
-  - type: AMAZON_DYNAMODB
-    name: dynamosource
-    config:
-      tableName:
-        Ref: MyDbTable # resolves to `myTable`
+- type: AMAZON_DYNAMODB
+  name: dynamosource
+  config:
+  tableName:
+  Ref: MyDbTable # resolves to `myTable`
 ```
 
 ## Override (or mock) values
