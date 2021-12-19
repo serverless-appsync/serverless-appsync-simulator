@@ -219,7 +219,7 @@ export default function getAppSyncConfig(context, appSyncConfig) {
   };
 
   const makeResolver = (resolver) => {
-    let mappingTemplate = mappingTemplateType.mappingTemplate;
+    let templateType = mappingTemplateType.mappingTemplate;
     return {
       kind: resolver.kind || 'UNIT',
       fieldName: resolver.field,
@@ -229,30 +229,30 @@ export default function getAppSyncConfig(context, appSyncConfig) {
       requestMappingTemplate: makeMappingTemplate(
         resolver,
         'request',
-        mappingTemplate,
+        templateType,
       ),
       responseMappingTemplate: makeMappingTemplate(
         resolver,
         'response',
-        mappingTemplate,
+        templateType,
       ),
     };
   };
 
   const makeFunctionConfiguration = (config) => {
-    let mappingTemplate = mappingTemplateType.functionConfiguration;
+    let templateType = mappingTemplateType.functionConfiguration;
     return {
       dataSourceName: config.dataSource,
       name: config.name,
       requestMappingTemplate: makeMappingTemplate(
         config,
         'request',
-        mappingTemplate,
+        templateType,
       ),
       responseMappingTemplate: makeMappingTemplate(
         config,
         'response',
-        mappingTemplate,
+        templateType,
       ),
     };
   };
