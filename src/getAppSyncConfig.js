@@ -13,6 +13,11 @@ const directLambdaMappingTemplates = {
   response: directLambdaResponse,
 };
 
+const mappingTemplateType = {
+  mappingTemplate: 'mappingTemplate',
+  functionConfiguration: 'functionConfiguration',
+};
+
 export default function getAppSyncConfig(context, appSyncConfig) {
   // Flattening params
   const cfg = {
@@ -27,12 +32,28 @@ export default function getAppSyncConfig(context, appSyncConfig) {
     cfg.mappingTemplatesLocation || 'mapping-templates',
   );
 
+  const functionConfigurationsLocation = path.join(
+    context.serverless.config.servicePath,
+    cfg.functionConfigurationsLocation || 'mapping-templates',
+  );
+
   const { defaultMappingTemplates = {} } = cfg;
 
-  const getMappingTemplate = (filePath) => {
-    return fs.readFileSync(path.join(mappingTemplatesLocation, filePath), {
-      encoding: 'utf8',
-    });
+  const getMappingTemplate = (filePath, type) => {
+    switch (type) {
+      case mappingTemplateType.mappingTemplate:
+        return fs.readFileSync(path.join(mappingTemplatesLocation, filePath), {
+          encoding: 'utf8',
+        });
+      case mappingTemplateType.functionConfiguration:
+        return fs.readFileSync(
+          path.join(functionConfigurationsLocation, filePath),
+          {
+            encoding: 'utf8',
+          },
+        );
+      default: return null;
+    }
   };
 
   const toAbsolutePosixPath = (basePath, filePath) =>
@@ -168,7 +189,7 @@ export default function getAppSyncConfig(context, appSyncConfig) {
     }
   };
 
-  const makeMappingTemplate = (resolver, type) => {
+  const makeMappingTemplate = (resolver, type, templateType) => {
     const { name, type: parent, field, substitutions = {} } = resolver;
 
     const defaultTemplatePrefix = name || `${parent}.${field}`;
@@ -185,7 +206,7 @@ export default function getAppSyncConfig(context, appSyncConfig) {
     if (templatePath === false) {
       mappingTemplate = directLambdaMappingTemplates[type];
     } else {
-      mappingTemplate = getMappingTemplate(templatePath);
+      mappingTemplate = getMappingTemplate(templatePath, templateType);
       // Substitutions
       const allSubstitutions = { ...cfg.substitutions, ...substitutions };
       forEach(allSubstitutions, (value, variable) => {
@@ -198,23 +219,43 @@ export default function getAppSyncConfig(context, appSyncConfig) {
   };
 
   const makeResolver = (resolver) => {
+    let mappingTemplate = mappingTemplateType.mappingTemplate;
     return {
       kind: resolver.kind || 'UNIT',
       fieldName: resolver.field,
       typeName: resolver.type,
       dataSourceName: resolver.dataSource,
       functions: resolver.functions,
-      requestMappingTemplate: makeMappingTemplate(resolver, 'request'),
-      responseMappingTemplate: makeMappingTemplate(resolver, 'response'),
+      requestMappingTemplate: makeMappingTemplate(
+        resolver,
+        'request',
+        mappingTemplate,
+      ),
+      responseMappingTemplate: makeMappingTemplate(
+        resolver,
+        'response',
+        mappingTemplate,
+      ),
     };
   };
 
-  const makeFunctionConfiguration = (config) => ({
-    dataSourceName: config.dataSource,
-    name: config.name,
-    requestMappingTemplate: makeMappingTemplate(config, 'request'),
-    responseMappingTemplate: makeMappingTemplate(config, 'response'),
-  });
+  const makeFunctionConfiguration = (config) => {
+    let mappingTemplate = mappingTemplateType.functionConfiguration;
+    return {
+      dataSourceName: config.dataSource,
+      name: config.name,
+      requestMappingTemplate: makeMappingTemplate(
+        config,
+        'request',
+        mappingTemplate,
+      ),
+      responseMappingTemplate: makeMappingTemplate(
+        config,
+        'response',
+        mappingTemplate,
+      ),
+    };
+  };
 
   const makeAuthType = (authType) => {
     const auth = {
