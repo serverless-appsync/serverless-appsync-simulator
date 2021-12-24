@@ -10,6 +10,7 @@ This serverless plugin is a wrapper for [amplify-appsync-simulator](https://gith
 - [serverless-appsync-plugin](https://github.com/sid88in/serverless-appsync-plugin)
 - [serverless-offline](https://github.com/dherault/serverless-offline)
 - [serverless-dynamodb-local](https://github.com/99xt/serverless-dynamodb-local) (when using dynamodb resolvers only)
+- [watchman](https://facebook.github.io/watchman/docs/install.html) (if Hot-reloading is desactivated it is not required)
 
 # Install
 
