@@ -280,6 +280,7 @@ class ServerlessAppSyncSimulator {
           accessKeyId: 'DEFAULT_ACCESS_KEY',
           secretAccessKey: 'DEFAULT_SECRET',
         },
+        openSearch: {},
       },
       get(this.serverless.service, 'custom.appsync-simulator', {}),
     );

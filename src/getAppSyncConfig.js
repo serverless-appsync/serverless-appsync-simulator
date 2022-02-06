@@ -186,6 +186,11 @@ export default function getAppSyncConfig(context, appSyncConfig) {
         };
       }
       case SourceType.AMAZON_ELASTICSEARCH:
+        return {
+          ...context.options.openSearch,
+          ...dataSource,
+          endpoint: source.config.endpoint,
+        };
       case SourceType.HTTP: {
         return {
           ...dataSource,
