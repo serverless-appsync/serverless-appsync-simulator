@@ -182,6 +182,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "adriantodt",
+      "name": "AdrianTodt",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6955035?v=4",
+      "profile": "https://adriantodt.net/",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

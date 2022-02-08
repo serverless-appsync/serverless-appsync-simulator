@@ -3,7 +3,7 @@ import axios from 'axios';
 import fs from 'fs';
 import { forEach, isNil, first } from 'lodash';
 import path from 'path';
-import { mergeTypes } from 'merge-graphql-schemas';
+import { mergeTypeDefs } from '@graphql-tools/merge';
 import * as globby from 'globby';
 import directLambdaRequest from './templates/direct-lambda.request.vtl';
 import directLambdaResponse from './templates/direct-lambda.response.vtl';
@@ -228,7 +228,16 @@ export default function getAppSyncConfig(context, appSyncConfig) {
   );
   const schema = {
     path: first(schemas).path,
-    content: mergeTypes(schemas.map((s) => s.content)),
+    content: mergeTypeDefs(
+      schemas.map((s) => s.content),
+      {
+        useSchemaDefinition: true,
+        forceSchemaDefinition: true,
+        throwOnConflict: true,
+        commentDescriptions: true,
+        reverseDirectives: true,
+      },
+    ),
   };
 
   return {

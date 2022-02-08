@@ -8,6 +8,8 @@ Le seul changement que nous avons apporté dans ce fork est de changer la versio
 
 ### Changement 
 
-Les commits de modifications :
+Les commits/PR de modifications :
 - 7df03530b8facd6a42a3ac62d59c3c39e0727a7b 
 
+- https://github.com/giraudvalentin/serverless-appsync-simulator/pull/1
+Pour la prise en compte des commentaires dans le schema graphql qui étaient auparavant supprimé

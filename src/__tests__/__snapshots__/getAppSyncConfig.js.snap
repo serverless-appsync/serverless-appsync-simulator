@@ -27,8 +27,7 @@ type Query {
 
 schema {
   query: Query
-}
-",
+}",
   "path": "schema.graphql",
 }
 `;
