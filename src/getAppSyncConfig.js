@@ -126,7 +126,33 @@ export default function getAppSyncConfig(context, appSyncConfig) {
               headers: payload?.request?.headers,
               validateStatus: false,
             });
-            return result.data;
+            // When the Lambda returns an error, the status code is 200 OK.
+            // The presence of an error is indicated by a header in the response.
+            // 400 and 500-series status codes are reserved for invocation errors:
+            // https://docs.aws.amazon.com/lambda/latest/dg/API_Invoke.html#API_Invoke_Errors
+            if (result.status === 200) {
+              const errorType =
+                result.headers['x-amz-function-error'] ||
+                result.headers['X-Amz-Function-Error'] ||
+                result.headers['x-amzn-errortype'] ||
+                result.headers['x-amzn-ErrorType'];
+              if (errorType) {
+                throw {
+                  type: `Lambda:${errorType}`,
+                  message: result.data.errorMessage,
+                };
+              }
+              // If the result of a lambda function is null or undefined, it returns as an empty string via HTTP.
+              // Then, AppSync handles an empty string of the response as null (or undefined).
+              if (result.data === '') {
+                return null;
+              }
+              return result.data;
+            } else {
+              throw new Error(
+                `Request failed with status code ${result.status}`,
+              );
+            }
           },
         };
       }
