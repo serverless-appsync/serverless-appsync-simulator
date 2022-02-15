@@ -1,6 +1,6 @@
 {
   "name": "serverless-appsync-simulator",
-  "version": "0.19.4",
+  "version": "0.19.5",
   "main": "lib/index.js",
   "author": "bboure",
   "license": "MIT",
