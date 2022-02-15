@@ -7,6 +7,16 @@ import { mergeTypeDefs } from '@graphql-tools/merge';
 import * as globby from 'globby';
 import directLambdaRequest from './templates/direct-lambda.request.vtl';
 import directLambdaResponse from './templates/direct-lambda.response.vtl';
+import {
+  DEFAULT_MAPPING_TEMPLATE_LOCATION,
+  DEFAULT_ENCODING,
+  DEFAULT_SCHEMA_FILE,
+  DEFAULT_HTTP_METHOD,
+  DEFAULT_RESOLVER_TYPE,
+  HTTPMessage,
+  MappingTemplateType,
+  SourceType,
+} from './constants';
 
 const directLambdaMappingTemplates = {
   request: directLambdaRequest,
@@ -24,15 +34,32 @@ export default function getAppSyncConfig(context, appSyncConfig) {
 
   const mappingTemplatesLocation = path.join(
     context.serverless.config.servicePath,
-    cfg.mappingTemplatesLocation || 'mapping-templates',
+    cfg.mappingTemplatesLocation || DEFAULT_MAPPING_TEMPLATE_LOCATION,
+  );
+
+  const functionConfigurationsLocation = path.join(
+    context.serverless.config.servicePath,
+    cfg.functionConfigurationsLocation || DEFAULT_MAPPING_TEMPLATE_LOCATION,
   );
 
   const { defaultMappingTemplates = {} } = cfg;
 
-  const getMappingTemplate = (filePath) => {
-    return fs.readFileSync(path.join(mappingTemplatesLocation, filePath), {
-      encoding: 'utf8',
-    });
+  const getMappingTemplate = (filePath, type) => {
+    switch (type) {
+      case MappingTemplateType.MAPPING_TEMPLATE:
+        return fs.readFileSync(path.join(mappingTemplatesLocation, filePath), {
+          encoding: DEFAULT_ENCODING,
+        });
+      case MappingTemplateType.FUNCTION_CONFIGURATION:
+        return fs.readFileSync(
+          path.join(functionConfigurationsLocation, filePath),
+          {
+            encoding: DEFAULT_ENCODING,
+          },
+        );
+      default:
+        return null;
+    }
   };
 
   const toAbsolutePosixPath = (basePath, filePath) =>
@@ -58,7 +85,7 @@ export default function getAppSyncConfig(context, appSyncConfig) {
   const getFileMap = (basePath, filePath) => ({
     path: filePath,
     content: fs.readFileSync(toAbsolutePosixPath(basePath, filePath), {
-      encoding: 'utf8',
+      encoding: DEFAULT_ENCODING,
     }),
   });
 
@@ -73,7 +100,7 @@ export default function getAppSyncConfig(context, appSyncConfig) {
     };
 
     switch (source.type) {
-      case 'AMAZON_DYNAMODB': {
+      case SourceType.AMAZON_DYNAMODB: {
         return {
           ...dataSource,
           config: {
@@ -82,13 +109,13 @@ export default function getAppSyncConfig(context, appSyncConfig) {
           },
         };
       }
-      case 'RELATIONAL_DATABASE': {
+      case SourceType.RELATIONAL_DATABASE: {
         return {
           ...dataSource,
           rds: context.options.rds,
         };
       }
-      case 'AWS_LAMBDA': {
+      case SourceType.AWS_LAMBDA: {
         const { functionName } = source.config;
         if (functionName === undefined) {
           context.plugin.log(`${source.name} does not have a functionName`, {
@@ -121,7 +148,7 @@ export default function getAppSyncConfig(context, appSyncConfig) {
           invoke: async (payload) => {
             const result = await axios.request({
               url,
-              method: method || 'POST',
+              method: method || DEFAULT_HTTP_METHOD,
               data: payload,
               headers: payload?.request?.headers,
               validateStatus: false,
@@ -156,8 +183,8 @@ export default function getAppSyncConfig(context, appSyncConfig) {
           },
         };
       }
-      case 'AMAZON_ELASTICSEARCH':
-      case 'HTTP': {
+      case SourceType.AMAZON_ELASTICSEARCH:
+      case SourceType.HTTP: {
         return {
           ...dataSource,
           endpoint: source.config.endpoint,
@@ -168,7 +195,7 @@ export default function getAppSyncConfig(context, appSyncConfig) {
     }
   };
 
-  const makeMappingTemplate = (resolver, type) => {
+  const makeMappingTemplate = (resolver, type, templateType) => {
     const { name, type: parent, field, substitutions = {} } = resolver;
 
     const defaultTemplatePrefix = name || `${parent}.${field}`;
@@ -185,7 +212,7 @@ export default function getAppSyncConfig(context, appSyncConfig) {
     if (templatePath === false) {
       mappingTemplate = directLambdaMappingTemplates[type];
     } else {
-      mappingTemplate = getMappingTemplate(templatePath);
+      mappingTemplate = getMappingTemplate(templatePath, templateType);
       // Substitutions
       const allSubstitutions = { ...cfg.substitutions, ...substitutions };
       forEach(allSubstitutions, (value, variable) => {
@@ -198,23 +225,43 @@ export default function getAppSyncConfig(context, appSyncConfig) {
   };
 
   const makeResolver = (resolver) => {
+    let templateType = MappingTemplateType.MAPPING_TEMPLATE;
     return {
-      kind: resolver.kind || 'UNIT',
+      kind: resolver.kind || DEFAULT_RESOLVER_TYPE,
       fieldName: resolver.field,
       typeName: resolver.type,
       dataSourceName: resolver.dataSource,
       functions: resolver.functions,
-      requestMappingTemplate: makeMappingTemplate(resolver, 'request'),
-      responseMappingTemplate: makeMappingTemplate(resolver, 'response'),
+      requestMappingTemplate: makeMappingTemplate(
+        resolver,
+        HTTPMessage.REQUEST,
+        templateType,
+      ),
+      responseMappingTemplate: makeMappingTemplate(
+        resolver,
+        HTTPMessage.RESPONSE,
+        templateType,
+      ),
     };
   };
 
-  const makeFunctionConfiguration = (config) => ({
-    dataSourceName: config.dataSource,
-    name: config.name,
-    requestMappingTemplate: makeMappingTemplate(config, 'request'),
-    responseMappingTemplate: makeMappingTemplate(config, 'response'),
-  });
+  const makeFunctionConfiguration = (config) => {
+    let templateType = MappingTemplateType.FUNCTION_CONFIGURATION;
+    return {
+      dataSourceName: config.dataSource,
+      name: config.name,
+      requestMappingTemplate: makeMappingTemplate(
+        config,
+        HTTPMessage.REQUEST,
+        templateType,
+      ),
+      responseMappingTemplate: makeMappingTemplate(
+        config,
+        HTTPMessage.RESPONSE,
+        templateType,
+      ),
+    };
+  };
 
   const makeAuthType = (authType) => {
     const auth = {
@@ -247,7 +294,7 @@ export default function getAppSyncConfig(context, appSyncConfig) {
   // Load the schema. If multiple provided, merge them
   const schemaPaths = Array.isArray(cfg.schema)
     ? cfg.schema
-    : [cfg.schema || 'schema.graphql'];
+    : [cfg.schema || DEFAULT_SCHEMA_FILE];
   const basePath = context.serverless.config.servicePath;
   const schemas = globFilePaths(basePath, schemaPaths).map((schemaPath) =>
     getFileMap(basePath, schemaPath),
