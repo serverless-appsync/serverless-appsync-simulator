@@ -39,7 +39,9 @@ export default function getAppSyncConfig(context, appSyncConfig) {
 
   const functionConfigurationsLocation = path.join(
     context.serverless.config.servicePath,
-    cfg.functionConfigurationsLocation || DEFAULT_MAPPING_TEMPLATE_LOCATION,
+    cfg.functionConfigurationsLocation ||
+      cfg.mappingTemplatesLocation ||
+      DEFAULT_MAPPING_TEMPLATE_LOCATION,
   );
 
   const { defaultMappingTemplates = {} } = cfg;
