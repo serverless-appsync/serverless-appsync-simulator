@@ -1,6 +1,6 @@
 {
   "name": "serverless-appsync-simulator",
-  "version": "0.19.6",
+  "version": "0.0.0-development",
   "main": "lib/index.js",
   "author": "bboure",
   "license": "MIT",
@@ -8,7 +8,7 @@
   "description": "Offline support for serverless-appsync-plugin",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bboure/serverless-appsync-simulator.git"
+    "url": "git+https://github.com/serverless-appsync/serverless-appsync-simulator.git"
   },
   "scripts": {
     "lint": "eslint src/*/**.js",
@@ -51,16 +51,6 @@
     "eslint-plugin-prettier": "^3.2.0",
     "prettier": "^2.2.1",
     "semantic-release": "^17.3.0"
-  },
-  "release": {
-    "branch": "master",
-    "plugins": [
-      "@semantic-release/commit-analyzer",
-      "@semantic-release/release-notes-generator",
-      "@semantic-release/npm",
-      "@semantic-release/git",
-      "@semantic-release/github"
-    ]
   },
   "keywords": [
     "serverless",
