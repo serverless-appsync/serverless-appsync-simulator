@@ -1,5 +1,6 @@
-[![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release) ![Release](https://github.com/bboure/serverless-appsync-simulator/workflows/Release/badge.svg) <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release) ![Release](https://serverless-appsync/serverless-appsync-simulator/workflows/Release/badge.svg) <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-20-orange.svg?style=flat-square)](#contributors-)
+
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 This serverless plugin is a wrapper for [amplify-appsync-simulator](https://github.com/aws-amplify/amplify-cli/tree/master/packages/amplify-appsync-simulator) made for testing AppSync APIs built with [serverless-appsync-plugin](https://github.com/sid88in/serverless-appsync-plugin).
@@ -53,7 +54,7 @@ Serverless: GraphiQl: http://localhost:20002
 Put options under `custom.appsync-simulator` in your `serverless.yml` file
 
 | option                   | default                    | description                                                                                                                                                                                          |
-| ------------------------ | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ------------------------ | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
 | apiKey                   | `0123456789`               | When using `API_KEY` as authentication type, the key to authenticate to the endpoint.                                                                                                                |
 | port                     | 20002                      | AppSync operations port; if using multiple APIs, the value of this option will be used as a starting point, and each other API will have a port of lastPort + 10 (e.g. 20002, 20012, 20022, etc.)    |
 | wsPort                   | 20003                      | AppSync subscriptions port; if using multiple APIs, the value of this option will be used as a starting point, and each other API will have a port of lastPort + 10 (e.g. 20003, 20013, 20023, etc.) |
@@ -70,7 +71,7 @@ Put options under `custom.appsync-simulator` in your `serverless.yml` file
 | dynamoDb.\*              |                            | You can add every configuration accepted by [DynamoDB SDK](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB.html#constructor-property)                                               |
 | rds.dbName               |                            | Name of the database                                                                                                                                                                                 |
 | rds.dbHost               |                            | Database host                                                                                                                                                                                        |
-| rds.dbDialect            |                            | Database dialect. Possible values (mysql|postgres)                                                                                                                                                   |
+| rds.dbDialect            |                            | Database dialect. Possible values (mysql                                                                                                                                                             | postgres) |
 | rds.dbUsername           |                            | Database username                                                                                                                                                                                    |
 | rds.dbPassword           |                            | Database password                                                                                                                                                                                    |
 | rds.dbPort               |                            | Database port                                                                                                                                                                                        |
@@ -260,6 +261,7 @@ This plugin supports resolvers implemented by `amplify-appsync-simulator`, as we
 - RELATIONAL_DATABASE
 
 ## Relational Database
+
 ### Sample VTL for a create mutation
 
 ```
@@ -295,6 +297,7 @@ This plugin supports resolvers implemented by `amplify-appsync-simulator`, as we
 ```
 
 ### Sample VTL for an update mutation
+
 ```
 #set( $update = "" )
 #set( $equals = "=" )
@@ -322,8 +325,8 @@ This plugin supports resolvers implemented by `amplify-appsync-simulator`, as we
 }
 ```
 
-
 ### Sample resolver for delete mutation
+
 ```
 {
   "version": "2018-05-29",
@@ -332,6 +335,7 @@ This plugin supports resolvers implemented by `amplify-appsync-simulator`, as we
 ```
 
 ### Sample mutation response VTL with support for handling AWSDateTime
+
 ```
 #set ( $index = -1)
 #set ( $result = $util.parseJson($ctx.result) )
@@ -343,7 +347,7 @@ This plugin supports resolvers implemented by `amplify-appsync-simulator`, as we
         #set ( $nowEpochMillis = $util.time.parseFormattedToEpochMilliSeconds("$time.substring(0,19)+0000", "yyyy-MM-dd HH:mm:ssZ") )
         #set ( $isoDateTime = $util.time.epochMilliSecondsToISO8601($nowEpochMillis) )
         $util.qr( $result["sqlStatementResults"][1]["records"][0][$index].put("stringValue", "$isoDateTime") )
-    #end   
+    #end
 #end
 #set ( $res = $util.parseJson($util.rds.toJsonString($util.toJson($result)))[1][0] )
 #set ( $response = {} )
@@ -368,6 +372,7 @@ $utils.toJson($response)
 ```
 
 ### Using Variable Map
+
 Variable map support is limited and does not differentiate numbers and strings data types, please inject them directly if needed.
 
 Will be escaped properly: `null`, `true`, and `false` values.
@@ -376,7 +381,7 @@ Will be escaped properly: `null`, `true`, and `false` values.
 {
   "version": "2018-05-29",
   "statements":   [
-    "UPDATE <name-of-table> set deleted_at=NOW() WHERE id=:ID", 
+    "UPDATE <name-of-table> set deleted_at=NOW() WHERE id=:ID",
     "SELECT * FROM <name-of-table> WHERE id=:ID and unix_timestamp > $ctx.args.newerThan"
   ],
   variableMap: {
@@ -395,30 +400,30 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- markdownlint-disable -->
 <table>
   <tr>
-    <td align="center"><a href="https://twitter.com/Benoit_Boure"><img src="https://avatars0.githubusercontent.com/u/7089997?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Benoît Bouré</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=bboure" title="Code">💻</a></td>
-    <td align="center"><a href="http://filip.pyrek.cz/"><img src="https://avatars1.githubusercontent.com/u/6282843?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Filip Pýrek</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=FilipPyrek" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/marcoreni"><img src="https://avatars2.githubusercontent.com/u/2797489?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Marco Reni</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=marcoreni" title="Code">💻</a></td>
-    <td align="center"><a href="https://egordmitriev.net/"><img src="https://avatars3.githubusercontent.com/u/4254771?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Egor Dmitriev</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=EgorDm" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/stschwark"><img src="https://avatars3.githubusercontent.com/u/900253?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Steffen Schwark</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=stschwark" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/moelholm"><img src="https://avatars2.githubusercontent.com/u/8393156?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Nicky Moelholm</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=moelholm" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/daisuke-awaji"><img src="https://avatars0.githubusercontent.com/u/20736455?v=4?s=100" width="100px;" alt=""/><br /><sub><b>g-awa</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=daisuke-awaji" title="Code">💻</a></td>
+    <td align="center"><a href="https://twitter.com/Benoit_Boure"><img src="https://avatars0.githubusercontent.com/u/7089997?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Benoît Bouré</b></sub></a><br /><a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=bboure" title="Code">💻</a></td>
+    <td align="center"><a href="http://filip.pyrek.cz/"><img src="https://avatars1.githubusercontent.com/u/6282843?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Filip Pýrek</b></sub></a><br /><a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=FilipPyrek" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/marcoreni"><img src="https://avatars2.githubusercontent.com/u/2797489?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Marco Reni</b></sub></a><br /><a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=marcoreni" title="Code">💻</a></td>
+    <td align="center"><a href="https://egordmitriev.net/"><img src="https://avatars3.githubusercontent.com/u/4254771?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Egor Dmitriev</b></sub></a><br /><a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=EgorDm" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/stschwark"><img src="https://avatars3.githubusercontent.com/u/900253?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Steffen Schwark</b></sub></a><br /><a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=stschwark" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/moelholm"><img src="https://avatars2.githubusercontent.com/u/8393156?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Nicky Moelholm</b></sub></a><br /><a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=moelholm" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/daisuke-awaji"><img src="https://avatars0.githubusercontent.com/u/20736455?v=4?s=100" width="100px;" alt=""/><br /><sub><b>g-awa</b></sub></a><br /><a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=daisuke-awaji" title="Code">💻</a></td>
   </tr>
   <tr>
-    <td align="center"><a href="https://github.com/LMulveyCM"><img src="https://avatars0.githubusercontent.com/u/39565663?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Lee Mulvey</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=LMulveyCM" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/JimmyHurrah"><img src="https://avatars1.githubusercontent.com/u/6367753?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jimmy Hurrah</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=JimmyHurrah" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/LMulveyCM"><img src="https://avatars0.githubusercontent.com/u/39565663?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Lee Mulvey</b></sub></a><br /><a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=LMulveyCM" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/JimmyHurrah"><img src="https://avatars1.githubusercontent.com/u/6367753?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jimmy Hurrah</b></sub></a><br /><a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=JimmyHurrah" title="Code">💻</a></td>
     <td align="center"><a href="https://abda.la/"><img src="https://avatars1.githubusercontent.com/u/219340?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Abdala</b></sub></a><br /><a href="#ideas-abdala" title="Ideas, Planning, & Feedback">🤔</a></td>
-    <td align="center"><a href="https://github.com/alexandrusavin"><img src="https://avatars2.githubusercontent.com/u/1612455?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Alexandru Savin</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=alexandrusavin" title="Documentation">📖</a></td>
-    <td align="center"><a href="https://github.com/Scale93"><img src="https://avatars.githubusercontent.com/u/36473880?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Scale93</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=Scale93" title="Code">💻</a> <a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=Scale93" title="Documentation">📖</a></td>
-    <td align="center"><a href="https://github.com/Liooo"><img src="https://avatars.githubusercontent.com/u/1630378?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ryo Yamada</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=Liooo" title="Code">💻</a> <a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=Liooo" title="Documentation">📖</a></td>
-    <td align="center"><a href="https://github.com/h-kishi"><img src="https://avatars.githubusercontent.com/u/8940568?v=4?s=100" width="100px;" alt=""/><br /><sub><b>h-kishi</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=h-kishi" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/alexandrusavin"><img src="https://avatars2.githubusercontent.com/u/1612455?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Alexandru Savin</b></sub></a><br /><a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=alexandrusavin" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/Scale93"><img src="https://avatars.githubusercontent.com/u/36473880?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Scale93</b></sub></a><br /><a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=Scale93" title="Code">💻</a> <a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=Scale93" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/Liooo"><img src="https://avatars.githubusercontent.com/u/1630378?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ryo Yamada</b></sub></a><br /><a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=Liooo" title="Code">💻</a> <a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=Liooo" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/h-kishi"><img src="https://avatars.githubusercontent.com/u/8940568?v=4?s=100" width="100px;" alt=""/><br /><sub><b>h-kishi</b></sub></a><br /><a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=h-kishi" title="Code">💻</a></td>
   </tr>
   <tr>
-    <td align="center"><a href="https://github.com/louislatreille"><img src="https://avatars.githubusercontent.com/u/8052355?v=4?s=100" width="100px;" alt=""/><br /><sub><b>louislatreille</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=louislatreille" title="Code">💻</a></td>
-    <td align="center"><a href="http://aleksac.me"><img src="https://avatars.githubusercontent.com/u/25728391?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Aleksa Cukovic</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=AleksaC" title="Code">💻</a></td>
-    <td align="center"><a href="https://vanmulligen.ca"><img src="https://avatars.githubusercontent.com/u/16951595?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Sean van Mulligen</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=seanvm" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/katesclau"><img src="https://avatars.githubusercontent.com/u/5067149?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Diego Rodrigues Ferreira</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=katesclau" title="Code">💻</a></td>
-    <td align="center"><a href="https://www.wednesday.is/"><img src="https://avatars.githubusercontent.com/u/4958010?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Mohammed Ali Chherawalla</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=alichherawalla" title="Code">💻</a></td>
-    <td align="center"><a href="https://adriantodt.net/"><img src="https://avatars.githubusercontent.com/u/6955035?v=4?s=100" width="100px;" alt=""/><br /><sub><b>AdrianTodt</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=adriantodt" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/louislatreille"><img src="https://avatars.githubusercontent.com/u/8052355?v=4?s=100" width="100px;" alt=""/><br /><sub><b>louislatreille</b></sub></a><br /><a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=louislatreille" title="Code">💻</a></td>
+    <td align="center"><a href="http://aleksac.me"><img src="https://avatars.githubusercontent.com/u/25728391?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Aleksa Cukovic</b></sub></a><br /><a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=AleksaC" title="Code">💻</a></td>
+    <td align="center"><a href="https://vanmulligen.ca"><img src="https://avatars.githubusercontent.com/u/16951595?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Sean van Mulligen</b></sub></a><br /><a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=seanvm" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/katesclau"><img src="https://avatars.githubusercontent.com/u/5067149?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Diego Rodrigues Ferreira</b></sub></a><br /><a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=katesclau" title="Code">💻</a></td>
+    <td align="center"><a href="https://www.wednesday.is/"><img src="https://avatars.githubusercontent.com/u/4958010?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Mohammed Ali Chherawalla</b></sub></a><br /><a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=alichherawalla" title="Code">💻</a></td>
+    <td align="center"><a href="https://adriantodt.net/"><img src="https://avatars.githubusercontent.com/u/6955035?v=4?s=100" width="100px;" alt=""/><br /><sub><b>AdrianTodt</b></sub></a><br /><a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=adriantodt" title="Code">💻</a></td>
   </tr>
 </table>
 

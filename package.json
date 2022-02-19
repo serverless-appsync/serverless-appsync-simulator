@@ -1,6 +1,6 @@
 {
   "name": "serverless-appsync-simulator",
-  "version": "0.19.6",
+  "version": "0.0.0-development",
   "main": "lib/index.js",
   "author": "bboure",
   "license": "MIT",
@@ -8,7 +8,7 @@
   "description": "Offline support for serverless-appsync-plugin",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bboure/serverless-appsync-simulator.git"
+    "url": "git+https://github.com/serverless-appsync/serverless-appsync-simulator.git"
   },
   "scripts": {
     "lint": "eslint src/*/**.js",
@@ -21,6 +21,7 @@
     "/lib"
   ],
   "dependencies": {
+    "@graphql-tools/merge": "^8.2.1",
     "amplify-appsync-simulator": "^1.27.4",
     "amplify-nodejs-function-runtime-provider": "^1.1.6",
     "aws-sdk": "^2.792.0",
@@ -33,7 +34,6 @@
     "globby": "^11.0.3",
     "jest": "^26.6.3",
     "lodash": "^4.17.20",
-    "@graphql-tools/merge": "^8.2.1",
     "mysql2": "^2.2.5",
     "pg": "^8.6.0"
   },
@@ -50,17 +50,7 @@
     "eslint-config-prettier": "^7.0.0",
     "eslint-plugin-prettier": "^3.2.0",
     "prettier": "^2.2.1",
-    "semantic-release": "^17.3.0"
-  },
-  "release": {
-    "branch": "master",
-    "plugins": [
-      "@semantic-release/commit-analyzer",
-      "@semantic-release/release-notes-generator",
-      "@semantic-release/npm",
-      "@semantic-release/git",
-      "@semantic-release/github"
-    ]
+    "semantic-release": "19"
   },
   "keywords": [
     "serverless",
