@@ -53,8 +53,8 @@ Serverless: GraphiQl: http://localhost:20002
 
 Put options under `custom.appsync-simulator` in your `serverless.yml` file
 
-| option                   | default                    | description                                                                                                                                                                                          |
-| ------------------------ | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| option                   | default                    | description                                                                                  |
+| ------------------------ | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | apiKey                   | `0123456789`               | When using `API_KEY` as authentication type, the key to authenticate to the endpoint.                                                                                                                |
 | port                     | 20002                      | AppSync operations port; if using multiple APIs, the value of this option will be used as a starting point, and each other API will have a port of lastPort + 10 (e.g. 20002, 20012, 20022, etc.)    |
 | wsPort                   | 20003                      | AppSync subscriptions port; if using multiple APIs, the value of this option will be used as a starting point, and each other API will have a port of lastPort + 10 (e.g. 20003, 20013, 20023, etc.) |
