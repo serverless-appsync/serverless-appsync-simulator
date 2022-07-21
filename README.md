@@ -4,7 +4,7 @@ Ni d'avoirs plusieurs ApiKey valides pour nos tests de subscriptions
 
 ### Objectif
 
-Le seul changement que nous avons apporté dans ce fork est de changer la version de la dépendance `amplify-appsync-simulator` qui un sous package de `amplify-cli` afin de le remplacer par une version supportant l'opération `BatchGetItem` au sein d'AppSync 
+Le seul changement que nous avons apporté dans ce fork est de changer la version de la dépendance `amplify-appsync-simulator` qui un sous package de `amplify-cli` afin de le remplacer par une version supportant l'opération `BatchGetItem` au sein d'AppSync
 Les procédures de mise à jour sont indiqué dans le projets.
 
 ## Les commits de modifications :

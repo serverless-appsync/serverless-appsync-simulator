@@ -191,6 +191,7 @@ export default function getAppSyncConfig(context, appSyncConfig) {
           ...dataSource,
           endpoint: source.config.endpoint,
         };
+
       case SourceType.HTTP: {
         return {
           ...dataSource,
