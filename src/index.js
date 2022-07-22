@@ -1,6 +1,7 @@
 import {
   AmplifyAppSyncSimulator,
   addDataLoader,
+  removeDataLoader,
 } from 'amplify-appsync-simulator';
 import { inspect } from 'util';
 import { defaults, get, merge, reduce } from 'lodash';
@@ -27,6 +28,7 @@ class ServerlessAppSyncSimulator {
     this.simulators = null;
 
     addDataLoader('HTTP', HttpDataLoader);
+    removeDataLoader('AMAZON_ELASTICSEARCH');
     addDataLoader('AMAZON_ELASTICSEARCH', ElasticDataLoader);
     addDataLoader('RELATIONAL_DATABASE', RelationalDataLoader);
 
@@ -280,6 +282,7 @@ class ServerlessAppSyncSimulator {
           accessKeyId: 'DEFAULT_ACCESS_KEY',
           secretAccessKey: 'DEFAULT_SECRET',
         },
+        openSearch: {},
       },
       get(this.serverless.service, 'custom.appsync-simulator', {}),
     );

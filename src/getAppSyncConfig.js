@@ -7,6 +7,16 @@ import { mergeTypeDefs } from '@graphql-tools/merge';
 import * as globby from 'globby';
 import directLambdaRequest from './templates/direct-lambda.request.vtl';
 import directLambdaResponse from './templates/direct-lambda.response.vtl';
+import {
+  DEFAULT_MAPPING_TEMPLATE_LOCATION,
+  DEFAULT_ENCODING,
+  DEFAULT_SCHEMA_FILE,
+  DEFAULT_HTTP_METHOD,
+  DEFAULT_RESOLVER_TYPE,
+  HTTPMessage,
+  MappingTemplateType,
+  SourceType,
+} from './constants';
 
 const directLambdaMappingTemplates = {
   request: directLambdaRequest,
@@ -24,15 +34,34 @@ export default function getAppSyncConfig(context, appSyncConfig) {
 
   const mappingTemplatesLocation = path.join(
     context.serverless.config.servicePath,
-    cfg.mappingTemplatesLocation || 'mapping-templates',
+    cfg.mappingTemplatesLocation || DEFAULT_MAPPING_TEMPLATE_LOCATION,
+  );
+
+  const functionConfigurationsLocation = path.join(
+    context.serverless.config.servicePath,
+    cfg.functionConfigurationsLocation ||
+      cfg.mappingTemplatesLocation ||
+      DEFAULT_MAPPING_TEMPLATE_LOCATION,
   );
 
   const { defaultMappingTemplates = {} } = cfg;
 
-  const getMappingTemplate = (filePath) => {
-    return fs.readFileSync(path.join(mappingTemplatesLocation, filePath), {
-      encoding: 'utf8',
-    });
+  const getMappingTemplate = (filePath, type) => {
+    switch (type) {
+      case MappingTemplateType.MAPPING_TEMPLATE:
+        return fs.readFileSync(path.join(mappingTemplatesLocation, filePath), {
+          encoding: DEFAULT_ENCODING,
+        });
+      case MappingTemplateType.FUNCTION_CONFIGURATION:
+        return fs.readFileSync(
+          path.join(functionConfigurationsLocation, filePath),
+          {
+            encoding: DEFAULT_ENCODING,
+          },
+        );
+      default:
+        return null;
+    }
   };
 
   const toAbsolutePosixPath = (basePath, filePath) =>
@@ -58,7 +87,7 @@ export default function getAppSyncConfig(context, appSyncConfig) {
   const getFileMap = (basePath, filePath) => ({
     path: filePath,
     content: fs.readFileSync(toAbsolutePosixPath(basePath, filePath), {
-      encoding: 'utf8',
+      encoding: DEFAULT_ENCODING,
     }),
   });
 
@@ -73,7 +102,7 @@ export default function getAppSyncConfig(context, appSyncConfig) {
     };
 
     switch (source.type) {
-      case 'AMAZON_DYNAMODB': {
+      case SourceType.AMAZON_DYNAMODB: {
         return {
           ...dataSource,
           config: {
@@ -82,13 +111,13 @@ export default function getAppSyncConfig(context, appSyncConfig) {
           },
         };
       }
-      case 'RELATIONAL_DATABASE': {
+      case SourceType.RELATIONAL_DATABASE: {
         return {
           ...dataSource,
           rds: context.options.rds,
         };
       }
-      case 'AWS_LAMBDA': {
+      case SourceType.AWS_LAMBDA: {
         const { functionName } = source.config;
         if (functionName === undefined) {
           context.plugin.log(`${source.name} does not have a functionName`, {
@@ -121,17 +150,49 @@ export default function getAppSyncConfig(context, appSyncConfig) {
           invoke: async (payload) => {
             const result = await axios.request({
               url,
-              method: method || 'POST',
+              method: method || DEFAULT_HTTP_METHOD,
               data: payload,
               headers: payload?.request?.headers,
               validateStatus: false,
             });
-            return result.data;
+            // When the Lambda returns an error, the status code is 200 OK.
+            // The presence of an error is indicated by a header in the response.
+            // 400 and 500-series status codes are reserved for invocation errors:
+            // https://docs.aws.amazon.com/lambda/latest/dg/API_Invoke.html#API_Invoke_Errors
+            if (result.status === 200) {
+              const errorType =
+                result.headers['x-amz-function-error'] ||
+                result.headers['X-Amz-Function-Error'] ||
+                result.headers['x-amzn-errortype'] ||
+                result.headers['x-amzn-ErrorType'];
+              if (errorType) {
+                throw {
+                  type: `Lambda:${errorType}`,
+                  message: result.data.errorMessage,
+                };
+              }
+              // If the result of a lambda function is null or undefined, it returns as an empty string via HTTP.
+              // Then, AppSync handles an empty string of the response as null (or undefined).
+              if (result.data === '') {
+                return null;
+              }
+              return result.data;
+            } else {
+              throw new Error(
+                `Request failed with status code ${result.status}`,
+              );
+            }
           },
         };
       }
-      case 'AMAZON_ELASTICSEARCH':
-      case 'HTTP': {
+      case SourceType.AMAZON_ELASTICSEARCH:
+        return {
+          ...context.options.openSearch,
+          ...dataSource,
+          endpoint: source.config.endpoint,
+        };
+
+      case SourceType.HTTP: {
         return {
           ...dataSource,
           endpoint: source.config.endpoint,
@@ -142,7 +203,7 @@ export default function getAppSyncConfig(context, appSyncConfig) {
     }
   };
 
-  const makeMappingTemplate = (resolver, type) => {
+  const makeMappingTemplate = (resolver, type, templateType) => {
     const { name, type: parent, field, substitutions = {} } = resolver;
 
     const defaultTemplatePrefix = name || `${parent}.${field}`;
@@ -159,7 +220,7 @@ export default function getAppSyncConfig(context, appSyncConfig) {
     if (templatePath === false) {
       mappingTemplate = directLambdaMappingTemplates[type];
     } else {
-      mappingTemplate = getMappingTemplate(templatePath);
+      mappingTemplate = getMappingTemplate(templatePath, templateType);
       // Substitutions
       const allSubstitutions = { ...cfg.substitutions, ...substitutions };
       forEach(allSubstitutions, (value, variable) => {
@@ -172,23 +233,43 @@ export default function getAppSyncConfig(context, appSyncConfig) {
   };
 
   const makeResolver = (resolver) => {
+    let templateType = MappingTemplateType.MAPPING_TEMPLATE;
     return {
-      kind: resolver.kind || 'UNIT',
+      kind: resolver.kind || DEFAULT_RESOLVER_TYPE,
       fieldName: resolver.field,
       typeName: resolver.type,
       dataSourceName: resolver.dataSource,
       functions: resolver.functions,
-      requestMappingTemplate: makeMappingTemplate(resolver, 'request'),
-      responseMappingTemplate: makeMappingTemplate(resolver, 'response'),
+      requestMappingTemplate: makeMappingTemplate(
+        resolver,
+        HTTPMessage.REQUEST,
+        templateType,
+      ),
+      responseMappingTemplate: makeMappingTemplate(
+        resolver,
+        HTTPMessage.RESPONSE,
+        templateType,
+      ),
     };
   };
 
-  const makeFunctionConfiguration = (config) => ({
-    dataSourceName: config.dataSource,
-    name: config.name,
-    requestMappingTemplate: makeMappingTemplate(config, 'request'),
-    responseMappingTemplate: makeMappingTemplate(config, 'response'),
-  });
+  const makeFunctionConfiguration = (config) => {
+    let templateType = MappingTemplateType.FUNCTION_CONFIGURATION;
+    return {
+      dataSourceName: config.dataSource,
+      name: config.name,
+      requestMappingTemplate: makeMappingTemplate(
+        config,
+        HTTPMessage.REQUEST,
+        templateType,
+      ),
+      responseMappingTemplate: makeMappingTemplate(
+        config,
+        HTTPMessage.RESPONSE,
+        templateType,
+      ),
+    };
+  };
 
   const makeAuthType = (authType) => {
     const auth = {
@@ -221,7 +302,7 @@ export default function getAppSyncConfig(context, appSyncConfig) {
   // Load the schema. If multiple provided, merge them
   const schemaPaths = Array.isArray(cfg.schema)
     ? cfg.schema
-    : [cfg.schema || 'schema.graphql'];
+    : [cfg.schema || DEFAULT_SCHEMA_FILE];
   const basePath = context.serverless.config.servicePath;
   const schemas = globFilePaths(basePath, schemaPaths).map((schemaPath) =>
     getFileMap(basePath, schemaPath),
