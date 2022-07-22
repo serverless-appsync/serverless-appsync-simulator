@@ -1883,7 +1883,7 @@ all-contributors-cli@^6.19.0:
     pify "^5.0.0"
     yargs "^15.0.1"
 
-"amplify-appsync-simulator@https://github.com/Next-Interactive/amplify-cli.git#f0dab115db1c5a2ddc3963dd79c1ccb150a4236b":
+"amplify-appsync-simulator@https://github.com/Next-Interactive/amplify-cli.git#2.4.1":
   version "2.4.1"
   resolved "https://github.com/Next-Interactive/amplify-cli.git#f0dab115db1c5a2ddc3963dd79c1ccb150a4236b"
   dependencies:
@@ -2194,9 +2194,9 @@ available-typed-arrays@^1.0.5:
   integrity sha512-DMD0KiN46eipeziST1LPP/STfDU0sufISXmjSgvVsoU2tqxctQeASejWcfNtxYKqETM1UxQ8sp2OrSBWpHY6sw==
 
 aws-sdk@^2.1113.0, aws-sdk@^2.792.0:
-  version "2.1179.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1179.0.tgz#c53b44e2f2137159d6092e1fd17d99e20184894f"
-  integrity sha512-QAfefyo20L6wCgWu1g0sOmH7AM822E7Wmdrp1AbFwPpXUBes8uKei2AQqkJmxaDnhAxyk79V7oEiosZYVZOBvg==
+  version "2.1180.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1180.0.tgz#01c5a5c845bea6676421cbb8fb162c4df8b719d5"
+  integrity sha512-QyQ+Zxb+AowFHb9N6qrmpA+LVZxUlBCfqEsRUAss+0y+QbEwfh4o+AxP6V0xz+m+UlBNxBkqJLx8UPoVk387LQ==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"
@@ -3314,9 +3314,9 @@ ee-first@1.1.1:
   integrity sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==
 
 electron-to-chromium@^1.4.188:
-  version "1.4.196"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.196.tgz#e18cdc5c1c2c2ebf78da237d0c374cc3b244d4cb"
-  integrity sha512-uxMa/Dt7PQsLBVXwH+t6JvpHJnrsYBaxWKi/J6HE+/nBtoHENhwBoNkgkm226/Kfxeg0z1eMQLBRPPKcDH8xWA==
+  version "1.4.198"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.198.tgz#36a8e7871046f7f94c01dc0133912fd5cf226c6a"
+  integrity sha512-jwqQPdKGeAslcq8L+1SZZgL6uDiIDmTe9Gq4brsdWAH27y7MJ2g9Ue6MyST3ogmSM49EAQP7bype1V5hsuNrmQ==
 
 emittery@^0.7.1:
   version "0.7.2"
