@@ -22,7 +22,7 @@
   ],
   "dependencies": {
     "@graphql-tools/merge": "^8.2.1",
-    "amplify-appsync-simulator": "https://github.com/Next-Interactive/amplify-cli.git#2.4.1",
+    "amplify-appsync-simulator": "git+https://github.com/Next-Interactive/amplify-cli.git#v2.4.2",
     "amplify-nodejs-function-runtime-provider": "^1.1.6",
     "aws-sdk": "^2.792.0",
     "axios": "^0.21.0",
