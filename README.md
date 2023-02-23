@@ -16,6 +16,9 @@ Les procédures de mise à jour sont indiqué dans le projets.
 Changement de branche + regen .lock et modification du projet Next-Interactive/amplify-cli
 (Todo Passer en tags)
 
+### Attention
+Bien penser à lancer `npm run build` avant de push les modifs
+
 ### Original README
 
 
