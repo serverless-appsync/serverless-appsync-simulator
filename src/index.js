@@ -51,7 +51,7 @@ class ServerlessAppSyncSimulator {
 
   getHttpProtocol(context) {
     // Default serverless-offline httpsProtocol is empty
-    let protocol = 'https';
+    let protocol = 'http';
     const offlineConfig = context.service.custom['serverless-offline'];
     // Check if the user has defined a certificate for https as part of their serverless.yml
     if (offlineConfig != undefined && offlineConfig.httpsProtocol != undefined) {
