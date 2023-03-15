@@ -128,7 +128,7 @@ class ServerlessAppSyncSimulator {
       }
 
       this.options.lambdaPort = this.getLambdaPort(this.serverless);
-      this.options.httpPort = this.getHttpPort(this.serverless);
+      this.options.httpPort = this.getHttpHost(this.serverless);
       this.options.httpProtocol = this.getHttpProtocol(this.serverless);
 
       if (Array.isArray(this.options.watch) && this.options.watch.length > 0) {
