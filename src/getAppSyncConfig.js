@@ -1,4 +1,4 @@
-import { AmplifyAppSyncSimulatorAuthenticationType as AuthTypes } from 'amplify-appsync-simulator';
+import { AmplifyAppSyncSimulatorAuthenticationType as AuthTypes } from '@aws-amplify/amplify-appsync-simulator';
 import axios from 'axios';
 import fs from 'fs';
 import { forEach, isNil, first } from 'lodash';
