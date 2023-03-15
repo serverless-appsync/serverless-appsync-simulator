@@ -46,6 +46,31 @@ class ServerlessAppSyncSimulator {
     }
   }
 
+  getHttpProtocol(context) {
+    // Default serverless-offline httpsProtocol is empty
+    let protocol = 'https';
+    const offlineConfig = context.service.custom['serverless-offline'];
+    // Check if the user has defined a certificate for https as part of their serverless.yml
+    if (offlineConfig != undefined && offlineConfig.httpsProtocol != undefined) {
+      protocol = 'https'
+    }
+
+    return protocol;
+  }
+
+
+  getHttpHost(context) {
+    // Default serverless-offline httpHost is localhost
+    let host = 'localhost';
+    const offlineConfig = context.service.custom['serverless-offline'];
+    // Check if the user has defined a specific host as part of their serverless.yml
+    if (offlineConfig != undefined && offlineConfig.host != undefined) {
+      host = offlineConfig.host;
+    }
+
+    return host;
+  }
+
   getLambdaPort(context) {
     // Default serverless-offline lambdaPort is 3002
     let port = 3002;
@@ -100,6 +125,8 @@ class ServerlessAppSyncSimulator {
       }
 
       this.options.lambdaPort = this.getLambdaPort(this.serverless);
+      this.options.httpPort = this.getHttpPort(this.serverless);
+      this.options.httpProtocol = this.getHttpProtocol(this.serverless);
 
       if (Array.isArray(this.options.watch) && this.options.watch.length > 0) {
         this.watch();

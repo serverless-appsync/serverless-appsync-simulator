@@ -143,7 +143,7 @@ export default function getAppSyncConfig(context, appSyncConfig) {
           url = func.url;
           method = func.method;
         } else {
-          url = `http://localhost:${context.options.lambdaPort}/2015-03-31/functions/${func.name}/invocations`;
+          url = `${context.options.httpProtocol}://${context.options.httpPort}:${context.options.lambdaPort}/2015-03-31/functions/${func.name}/invocations`;
         }
         return {
           ...dataSource,
