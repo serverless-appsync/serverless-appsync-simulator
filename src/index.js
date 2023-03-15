@@ -1,6 +1,6 @@
 import {
   AmplifyAppSyncSimulator,
-  addDataLoader,
+  addDataLoader, getDataLoader
 } from '@aws-amplify/amplify-appsync-simulator';
 import { inspect } from 'util';
 import { defaults, get, merge, reduce } from 'lodash';
@@ -26,9 +26,23 @@ class ServerlessAppSyncSimulator {
 
     this.simulators = null;
 
-    addDataLoader('HTTP', HttpDataLoader);
-    addDataLoader('AMAZON_ELASTICSEARCH', ElasticDataLoader);
-    addDataLoader('RELATIONAL_DATABASE', RelationalDataLoader);
+    try {
+      getDataLoader('HTTP');
+    } catch (e) {
+      addDataLoader('HTTP', HttpDataLoader);
+    }
+
+    try {
+      getDataLoader('AMAZON_ELASTICSEARCH');
+    } catch (e) {
+      addDataLoader('AMAZON_ELASTICSEARCH', ElasticDataLoader);
+    }
+
+    try {
+      getDataLoader('RELATIONAL_DATABASE');
+    } catch (e) {
+      addDataLoader('RELATIONAL_DATABASE', RelationalDataLoader);
+    }
 
     this.hooks = {
       'before:offline:start:init': this.startServers.bind(this),
