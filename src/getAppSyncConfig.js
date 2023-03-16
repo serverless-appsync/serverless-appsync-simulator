@@ -73,9 +73,7 @@ export default function getAppSyncConfig(context, appSyncConfig) {
   const globFilePaths = (basePath, filePaths) => {
     return filePaths
       .map((filePath) => {
-        const paths = globby.globbySync(
-          toAbsolutePosixPath(basePath, filePath),
-        );
+        const paths = globby.sync(toAbsolutePosixPath(basePath, filePath));
         if (path.isAbsolute(filePath)) {
           return paths;
         } else {
