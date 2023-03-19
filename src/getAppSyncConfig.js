@@ -23,25 +23,119 @@ const directLambdaMappingTemplates = {
   response: directLambdaResponse,
 };
 
+const convertAppSyncConfigBackToOldVersion = (appSyncConfig) => {
+  if (
+    appSyncConfig.authentication &&
+    appSyncConfig.authentication.hasOwnProperty('type')
+  ) {
+    appSyncConfig.authenticationType = appSyncConfig.authentication.type;
+  }
+
+  if (appSyncConfig.dataSources && !Array.isArray(appSyncConfig.dataSources)) {
+    console.log('AppSync Simulator: Convert new configuration to old one');
+    const arrayDataSources = [];
+    for (const [key, value] of Object.entries(appSyncConfig.dataSources)) {
+      const name = value.hasOwnProperty('name') ? value.name : key;
+
+      arrayDataSources.push({
+        ...value,
+        name: name,
+      });
+    }
+    appSyncConfig.dataSources = arrayDataSources;
+    appSyncConfig.version = '2.2.0';
+  }
+
+  if (
+    appSyncConfig.pipelineFunctions &&
+    !Array.isArray(appSyncConfig.pipelineFunctions)
+  ) {
+    console.log('AppSync Simulator: Convert new configuration to old one');
+    const arrayPipelineFunctions = [];
+    for (const [key, value] of Object.entries(
+      appSyncConfig.pipelineFunctions,
+    )) {
+      const name = value.hasOwnProperty('name') ? value.name : key;
+      const pipelineFunction = {
+        ...value,
+        name: name,
+      };
+
+      if (
+        !pipelineFunction.hasOwnProperty('code') &&
+        !(
+          pipelineFunction.hasOwnProperty('request') ||
+          pipelineFunction.hasOwnProperty('response')
+        )
+      ) {
+        if (!pipelineFunction.hasOwnProperty('request')) {
+          pipelineFunction['request'] = false;
+        }
+        if (!pipelineFunction.hasOwnProperty('response')) {
+          pipelineFunction['response'] = false;
+        }
+      }
+
+      arrayPipelineFunctions.push(pipelineFunction);
+    }
+    appSyncConfig.functionConfigurations = arrayPipelineFunctions;
+    appSyncConfig.version = '2.2.0';
+  }
+
+  if (appSyncConfig.resolvers) {
+    console.log('AppSync Simulator: Convert new configuration to old one');
+    const arrayMappingTemplates = [];
+
+    for (const [key, value] of Object.entries(appSyncConfig.resolvers)) {
+      const keySplitted = key.split('.');
+      const type = value.hasOwnProperty('type') ? value.type : keySplitted[0];
+      const field = value.hasOwnProperty('field')
+        ? value.field
+        : keySplitted[1];
+
+      arrayMappingTemplates.push({
+        ...value,
+        type: type,
+        field: field,
+      });
+    }
+    // console.log('Mapping Config', arrayMappingTemplates);
+    appSyncConfig.mappingTemplates = arrayMappingTemplates;
+    appSyncConfig.version = '2.2.0';
+  }
+
+  return appSyncConfig;
+};
+
 export default function getAppSyncConfig(context, appSyncConfig) {
   // Flattening params
+
+  const modifiedAppSyncConfig =
+    convertAppSyncConfigBackToOldVersion(appSyncConfig);
+
   const cfg = {
-    ...appSyncConfig,
-    mappingTemplates: (appSyncConfig.mappingTemplates || []).flat(),
-    functionConfigurations: (appSyncConfig.functionConfigurations || []).flat(),
-    dataSources: (appSyncConfig.dataSources || []).flat(),
+    ...modifiedAppSyncConfig,
+    mappingTemplates: (modifiedAppSyncConfig.mappingTemplates || []).flat(),
+    functionConfigurations: (
+      modifiedAppSyncConfig.functionConfigurations || []
+    ).flat(),
+    dataSources: (modifiedAppSyncConfig.dataSources || []).flat(),
   };
 
   const mappingTemplatesLocation = path.join(
     context.serverless.config.servicePath,
-    cfg.mappingTemplatesLocation || DEFAULT_MAPPING_TEMPLATE_LOCATION,
+    modifiedAppSyncConfig.hasOwnProperty('version')
+      ? ''
+      : cfg.mappingTemplatesLocation || DEFAULT_MAPPING_TEMPLATE_LOCATION,
   );
 
   const functionConfigurationsLocation = path.join(
     context.serverless.config.servicePath,
-    cfg.functionConfigurationsLocation ||
-      cfg.mappingTemplatesLocation ||
-      DEFAULT_MAPPING_TEMPLATE_LOCATION,
+    modifiedAppSyncConfig.hasOwnProperty('version')
+      ? ''
+      : cfg.functionConfigurationsLocation ||
+          cfg.mappingTemplatesLocation ||
+          DEFAULT_MAPPING_TEMPLATE_LOCATION,
   );
 
   const { defaultMappingTemplates = {} } = cfg;

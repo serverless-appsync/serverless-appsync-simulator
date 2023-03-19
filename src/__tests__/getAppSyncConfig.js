@@ -2,6 +2,68 @@ import path from 'path';
 import getAppSyncConfig from '../getAppSyncConfig';
 
 describe('getAppSyncConfig', () => {
+  it('should generate a valid config even with serverless-appsync-plugin >= 2.2.0', () => {
+    const config = {
+      dataSources: {
+        lambda: {
+          type: 'AWS_LAMBDA',
+          name: 'lambda',
+          config: {
+            functionName: 'getPosts',
+          },
+        },
+        dynamodb: {
+          type: 'AMAZON_DYNAMODB',
+          name: 'dynamodb',
+          config: {
+            tableName: 'myTable',
+          },
+        },
+        http: {
+          type: 'HTTP',
+          name: 'http',
+          config: {
+            endpoint: 'http://127.0.0.1',
+          },
+        },
+      },
+    };
+
+    const result = getAppSyncConfig(
+      {
+        options: {
+          apiKey: '123456789',
+          dynamoDb: {
+            endpoint: `http://localhost:8000`,
+            region: 'localhost',
+            accessKeyId: 'DEFAULT_ACCESS_KEY',
+            secretAccessKey: 'DEFAULT_SECRET',
+            sessionToken: 'DEFAULT_SESSION_TOKEN',
+          },
+        },
+        serverless: {
+          config: { servicePath: path.join(__dirname, 'files') },
+          service: {
+            functions: {
+              getPost: {
+                hndler: 'index.handler',
+              },
+              getPosts: {
+                hndler: 'index.handler',
+              },
+            },
+          },
+        },
+      },
+      config,
+    );
+    expect(result.appSync).toMatchSnapshot();
+    expect(result.schema).toMatchSnapshot();
+    expect(result.resolvers).toMatchSnapshot();
+    expect(result.dataSources).toMatchSnapshot();
+    expect(result.functions).toMatchSnapshot();
+  });
+
   it('should generate a valid config', () => {
     const config = {
       name: 'myAPI',
