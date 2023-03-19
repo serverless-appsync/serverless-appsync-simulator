@@ -192,3 +192,66 @@ $util.toJson($ctx.result)
   },
 ]
 `;
+
+exports[`getAppSyncConfig should generate a valid config even with serverless-appsync-plugin >= 2.2.0 1`] = `
+Object {
+  "additionalAuthenticationProviders": Array [],
+  "apiKey": "123456789",
+  "defaultAuthenticationType": Object {
+    "authenticationType": undefined,
+  },
+  "name": undefined,
+}
+`;
+
+exports[`getAppSyncConfig should generate a valid config even with serverless-appsync-plugin >= 2.2.0 2`] = `
+Object {
+  "content": "type Post {
+  userId: Int!
+  id: Int!
+  title: String!
+  body: String!
+}
+
+type Query {
+  getPost: Post
+  getPosts: [Post]!
+}
+
+schema {
+  query: Query
+}",
+  "path": "schema.graphql",
+}
+`;
+
+exports[`getAppSyncConfig should generate a valid config even with serverless-appsync-plugin >= 2.2.0 3`] = `Array []`;
+
+exports[`getAppSyncConfig should generate a valid config even with serverless-appsync-plugin >= 2.2.0 4`] = `
+Array [
+  Object {
+    "invoke": [Function],
+    "name": "lambda",
+    "type": "AWS_LAMBDA",
+  },
+  Object {
+    "config": Object {
+      "accessKeyId": "DEFAULT_ACCESS_KEY",
+      "endpoint": "http://localhost:8000",
+      "region": "localhost",
+      "secretAccessKey": "DEFAULT_SECRET",
+      "sessionToken": "DEFAULT_SESSION_TOKEN",
+      "tableName": "myTable",
+    },
+    "name": "dynamodb",
+    "type": "AMAZON_DYNAMODB",
+  },
+  Object {
+    "endpoint": "http://127.0.0.1",
+    "name": "http",
+    "type": "HTTP",
+  },
+]
+`;
+
+exports[`getAppSyncConfig should generate a valid config even with serverless-appsync-plugin >= 2.2.0 5`] = `Array []`;

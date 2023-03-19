@@ -1,7 +1,7 @@
 import {
   AmplifyAppSyncSimulator,
   addDataLoader,
-} from 'amplify-appsync-simulator';
+} from '@aws-amplify/amplify-appsync-simulator';
 import { inspect } from 'util';
 import { defaults, get, merge, reduce } from 'lodash';
 import NodeEvaluator from 'cfn-resolver-lib';
@@ -27,7 +27,10 @@ class ServerlessAppSyncSimulator {
     this.simulators = null;
 
     addDataLoader('HTTP', HttpDataLoader);
-    addDataLoader('AMAZON_ELASTICSEARCH', ElasticDataLoader);
+
+    // not needed anymore, this loader is registered by the new version of @aws-amplify/amplify-appsync-simulator
+    // addDataLoader('AMAZON_ELASTICSEARCH', ElasticDataLoader);
+    
     addDataLoader('RELATIONAL_DATABASE', RelationalDataLoader);
 
     this.hooks = {
@@ -44,6 +47,31 @@ class ServerlessAppSyncSimulator {
     if (process.env.SLS_DEBUG) {
       this.log(message, opts);
     }
+  }
+
+  getHttpProtocol(context) {
+    // Default serverless-offline httpsProtocol is empty
+    let protocol = 'http';
+    const offlineConfig = context.service.custom['serverless-offline'];
+    // Check if the user has defined a certificate for https as part of their serverless.yml
+    if (offlineConfig != undefined && offlineConfig.httpsProtocol != undefined) {
+      protocol = 'https'
+    }
+
+    return protocol;
+  }
+
+
+  getHttpHost(context) {
+    // Default serverless-offline httpHost is localhost
+    let host = 'localhost';
+    const offlineConfig = context.service.custom['serverless-offline'];
+    // Check if the user has defined a specific host as part of their serverless.yml
+    if (offlineConfig != undefined && offlineConfig.host != undefined) {
+      host = offlineConfig.host;
+    }
+
+    return host;
   }
 
   getLambdaPort(context) {
@@ -100,6 +128,8 @@ class ServerlessAppSyncSimulator {
       }
 
       this.options.lambdaPort = this.getLambdaPort(this.serverless);
+      this.options.httpHost = this.getHttpHost(this.serverless);
+      this.options.httpProtocol = this.getHttpProtocol(this.serverless);
 
       if (Array.isArray(this.options.watch) && this.options.watch.length > 0) {
         this.watch();
