@@ -1,6 +1,8 @@
 /* eslint-disable class-methods-use-this */
 export default class NotImplementedDataLoader {
-  constructor(config) {
+  private config: any;
+
+  constructor(config: any) {
     this.config = config;
   }
 

@@ -2,29 +2,36 @@ import axios from 'axios';
 import * as AWS from 'aws-sdk';
 
 export default class ElasticDataLoader {
-  constructor(config) {
+  private config: any;
+
+  constructor(config: any) {
     this.config = config;
   }
 
-  async load(req) {
+  async load(req: {
+    path: string;
+    params: { headers: any; queryString: any; body: any };
+    operation: string;
+  }) {
     try {
       if (this.config.useSignature) {
         const signedRequest = await this.createSignedRequest(req);
+        // @ts-ignore
         const client = new AWS.HttpClient();
-        const data = await new Promise((resolve, reject) => {
+        const data = await new Promise<string>((resolve, reject) => {
           client.handleRequest(
             signedRequest,
             null,
-            (response) => {
+            (response: any) => {
               let responseBody = '';
-              response.on('data', (chunk) => {
+              response.on('data', (chunk: string) => {
                 responseBody += chunk;
               });
               response.on('end', () => {
                 resolve(responseBody);
               });
             },
-            (err) => {
+            (err: any) => {
               reject(err);
             },
           );
@@ -49,7 +56,11 @@ export default class ElasticDataLoader {
     return null;
   }
 
-  async createSignedRequest(req) {
+  async createSignedRequest(req: {
+    path: string;
+    params: any;
+    operation: string;
+  }) {
     const domain = this.config.endpoint.replace('https://', '');
     const headers = {
       ...req.params.headers,
@@ -65,6 +76,7 @@ export default class ElasticDataLoader {
     httpRequest.path = req.path;
 
     const credentials = await this.getCredentials();
+    // @ts-ignore
     const signer = new AWS.Signers.V4(httpRequest, 'es');
     signer.addAuthorization(credentials, new Date());
 

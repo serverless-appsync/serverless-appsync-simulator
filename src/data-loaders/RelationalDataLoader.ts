@@ -1,7 +1,13 @@
-import Promise from 'bluebird';
-import { Client, types as pgTypes } from 'pg';
-import mysql from 'mysql2/promise';
+import {
+  Client,
+  FieldDef,
+  QueryArrayResult,
+  QueryResult,
+  types as pgTypes,
+} from 'pg';
+import mysql, { FieldPacket } from 'mysql2/promise';
 import { Types } from 'mysql2';
+
 const FLAGS = {
   NOT_NULL: 1,
   PRI_KEY: 2,
@@ -20,10 +26,10 @@ const FLAGS = {
   NUM: 32768,
 };
 
-const decToBin = (dec) => parseInt((dec >>> 0).toString(2), 2);
+const decToBin = (dec: number) => parseInt((dec >>> 0).toString(2), 2);
 
-const convertMySQLResponseToColumnMetaData = (rows) => {
-  return rows.map((row) => {
+const convertMySQLResponseToColumnMetaData = (rows: FieldPacket[]) => {
+  return rows.map((row: any) => {
     // @TODO: Add for the following fields
     // arrayBaseColumnType,
     // isCaseSensitive,
@@ -39,9 +45,14 @@ const convertMySQLResponseToColumnMetaData = (rows) => {
       name: row.name,
       nullable: decToBin(row.flags && FLAGS.NOT_NULL) !== FLAGS.NOT_NULL,
       type: row.columnType,
-      typeName: Object.keys(Types)
-        .find((key) => Types[key] === row.columnType)
-        .toUpperCase(),
+      typeName: (() => {
+        for (const [key, value] of Object.entries(Types)) {
+          if (value === row.columnType) {
+            return key.toUpperCase();
+          }
+        }
+        return 'UNKNOWN';
+      })(),
       isSigned: decToBin(row.flags & FLAGS.UNSIGNED) !== FLAGS.UNSIGNED,
       autoIncrement:
         decToBin(row.flags & FLAGS.AUTO_INCREMENT) === FLAGS.AUTO_INCREMENT,
@@ -51,11 +62,11 @@ const convertMySQLResponseToColumnMetaData = (rows) => {
     };
   });
 };
-const convertSQLResponseToRDSRecords = (rows) => {
-  const records = [];
+const convertSQLResponseToRDSRecords = (rows: any[]) => {
+  const records: any[][] = [];
 
   rows.forEach((dbObject) => {
-    const record = [];
+    const record: any[] = [];
     Object.keys(dbObject).forEach((key) => {
       record.push(
         dbObject[key] === null
@@ -72,12 +83,16 @@ const convertSQLResponseToRDSRecords = (rows) => {
   return records;
 };
 
-const convertPostgresSQLResponseToColumnMetaData = (rows) => {
+const convertPostgresSQLResponseToColumnMetaData = (rows: FieldDef[]) => {
   return rows.map((row) => {
-    const typeName =
-      Object.keys(pgTypes.builtins).find(
-        (d) => pgTypes.builtins[d] === row.dataTypeID,
-      ) ?? 'UNKNOWN';
+    const typeName = (() => {
+      for (const [key, value] of Object.entries(pgTypes.builtins)) {
+        if (value === row.dataTypeID) {
+          return key;
+        }
+      }
+      return 'UNKNOWN';
+    })();
     // @TODO: Add support for the following fields
     // isAutoIncrement,
     // nullable,
@@ -100,14 +115,17 @@ const convertPostgresSQLResponseToColumnMetaData = (rows) => {
   });
 };
 
-const injectVariables = (statement, req) => {
+const injectVariables = (
+  statement: string,
+  req: { variableMap: any },
+): string => {
   const { variableMap } = req;
   if (!variableMap) {
     return statement;
   }
   const result = Object.keys(variableMap).reduce((statmnt, key) => {
     // Adds 'g' for replaceAll effect
-    var re = new RegExp(key, 'g');
+    const re = new RegExp(key, 'g');
     if (variableMap[key] === null || typeof variableMap[key] == 'boolean') {
       return statmnt.replace(re, `${variableMap[key]}`);
     }
@@ -117,20 +135,30 @@ const injectVariables = (statement, req) => {
   return result;
 };
 
-const executeSqlStatements = async (client, req) =>
-  Promise.mapSeries(req.statements, async (statement) => {
-    statement = injectVariables(statement, req);
+const executeSqlStatements = async (client: DbClient | null, req: any) => {
+  if (!client) {
+    throw new Error('RDS client not initialized');
+  }
+  for (const statement of req.statements) {
+    const sql = injectVariables(statement, req);
     try {
-      const result = await client.query(statement);
+      // @ts-ignore
+      const result = await client.query(sql);
       return result;
     } catch (error) {
       console.log(`RDS_DATALOADER: Failed to execute: `, statement, error);
       throw error;
     }
-  });
+  }
+};
+
+type DbClient = mysql.Connection | Client;
 
 export default class RelationalDataLoader {
-  constructor(config) {
+  private config: any;
+  private client: DbClient | null;
+
+  constructor(config: any) {
     this.config = config;
     this.client = null;
   }
@@ -165,7 +193,6 @@ export default class RelationalDataLoader {
       database: this.config.rds.dbName,
       port: this.config.rds.dbPort,
     };
-    const res = {};
     if (this.config.rds.dbDialect === 'mysql') {
       this.client = await mysql.createConnection(dbConfig);
     } else if (this.config.rds.dbDialect === 'postgres') {
@@ -175,13 +202,13 @@ export default class RelationalDataLoader {
     return this.client;
   }
 
-  async load(req) {
+  async load(req: any) {
     try {
       const client = await this.getClient();
-      const res = {};
+      const res: any = {};
       const results = await executeSqlStatements(client, req);
       if (this.config.rds.dbDialect === 'mysql') {
-        res.sqlStatementResults = results.map((result) => {
+        res.sqlStatementResults = results.map((result: any) => {
           if (result.length < 2) {
             return {};
           }
@@ -199,16 +226,18 @@ export default class RelationalDataLoader {
           };
         });
       } else if (this.config.rds.dbDialect === 'postgres') {
-        res.sqlStatementResults = results.map((result) => {
-          return {
-            numberOfRecordsUpdated: result.rowCount,
-            records: convertSQLResponseToRDSRecords(result.rows),
-            columnMetadata: convertPostgresSQLResponseToColumnMetaData(
-              result.fields,
-            ),
-            generatedFields: [],
-          };
-        });
+        res.sqlStatementResults = results.map(
+          (result: QueryResult | QueryArrayResult) => {
+            return {
+              numberOfRecordsUpdated: result.rowCount,
+              records: convertSQLResponseToRDSRecords(result.rows),
+              columnMetadata: convertPostgresSQLResponseToColumnMetaData(
+                result.fields,
+              ),
+              generatedFields: [],
+            };
+          },
+        );
       }
       return JSON.stringify(res);
     } catch (e) {
