@@ -113,10 +113,10 @@ describe('getAppSyncConfig', () => {
           service: {
             functions: {
               getPost: {
-                hndler: 'index.handler',
+                handler: 'index.handler',
               },
               getPosts: {
-                hndler: 'index.handler',
+                handler: 'index.handler',
               },
             },
           },

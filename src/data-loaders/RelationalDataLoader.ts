@@ -1,3 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import { Types } from 'mysql2';
+import mysql, { FieldPacket } from 'mysql2/promise';
 import {
   Client,
   FieldDef,
@@ -5,8 +14,6 @@ import {
   QueryResult,
   types as pgTypes,
 } from 'pg';
-import mysql, { FieldPacket } from 'mysql2/promise';
-import { Types } from 'mysql2';
 
 const FLAGS = {
   NOT_NULL: 1,
@@ -57,6 +64,7 @@ const convertMySQLResponseToColumnMetaData = (rows: FieldPacket[]) => {
       autoIncrement:
         decToBin(row.flags & FLAGS.AUTO_INCREMENT) === FLAGS.AUTO_INCREMENT,
       tableName: row._buf
+        // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
         .slice(row._tableStart, row._tableStart + row._tableLength)
         .toString(),
     };
@@ -117,7 +125,7 @@ const convertPostgresSQLResponseToColumnMetaData = (rows: FieldDef[]) => {
 
 const injectVariables = (
   statement: string,
-  req: { variableMap: any },
+  req: { variableMap?: Record<string, any> },
 ): string => {
   const { variableMap } = req;
   if (!variableMap) {
@@ -202,12 +210,12 @@ export default class RelationalDataLoader {
     return this.client;
   }
 
-  async load(req: any) {
+  async load(req: any): Promise<object | null> {
     try {
       const client = await this.getClient();
       const res: any = {};
       const results = await executeSqlStatements(client, req);
-      if (this.config.rds.dbDialect === 'mysql') {
+      if (this.config.rds?.dbDialect === 'mysql') {
         res.sqlStatementResults = results.map((result: any) => {
           if (result.length < 2) {
             return {};
@@ -239,10 +247,10 @@ export default class RelationalDataLoader {
           },
         );
       }
-      return JSON.stringify(res);
+      return res;
     } catch (e) {
       console.log(e);
-      return e;
+      return e as object;
     }
   }
 }

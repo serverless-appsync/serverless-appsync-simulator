@@ -24,9 +24,9 @@ declare module '@serverless/utils/log' {
 }
 
 declare module 'serverless/lib/Serverless' {
-  import { AppSyncConfigInput } from './plugin';
-  import Provider from 'serverless/lib/plugins/aws/provider.js';
   import type { AWS } from '@serverless/typescript';
+  import Provider from 'serverless/lib/plugins/aws/provider.js';
+  import { AppSyncConfigInput } from './appSync';
 
   declare interface ServerlessError {
     name: string;
@@ -93,8 +93,9 @@ declare module 'serverless/lib/Serverless' {
 }
 
 declare module 'serverless/lib/plugins/aws/provider.js' {
-  import Serverless from 'serverless/lib/Serverless';
   import { ServiceConfigurationOptions } from 'aws-sdk/lib/service';
+  import Serverless from 'serverless/lib/Serverless';
+
   declare class Provider {
     constructor(serverless: Serverless);
     naming: {

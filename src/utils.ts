@@ -1,6 +1,6 @@
 import fs from 'fs';
-import globby from 'globby';
 import path from 'path';
+import globby from 'globby';
 import { DEFAULT_ENCODING } from './constants';
 
 function toAbsolutePosixPath(basePath: string, filePath: string): string {
