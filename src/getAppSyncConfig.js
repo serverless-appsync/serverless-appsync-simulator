@@ -1,4 +1,5 @@
 import { AmplifyAppSyncSimulatorAuthenticationType as AuthTypes } from 'amplify-appsync-simulator';
+import { invoke } from 'amplify-nodejs-function-runtime-provider/lib/utils/invoke';
 import axios from 'axios';
 import fs from 'fs';
 import { forEach, isNil, first } from 'lodash';
@@ -148,6 +149,24 @@ export default function getAppSyncConfig(context, appSyncConfig) {
         return {
           ...dataSource,
           invoke: async (payload) => {
+            if (context.options.location) {
+              return await invoke({
+                packageFolder: path.join(
+                  context.serverless.config.servicePath,
+                  context.options.location,
+                ),
+                handler: func.handler,
+                event: JSON.stringify(payload),
+                environment: {
+                  ...(context.options.lambda.loadLocalEnv === true
+                    ? process.env
+                    : {}),
+                  ...context.serverless.service.provider.environment,
+                  ...func.environment,
+                },
+              });
+            }
+
             const result = await axios.request({
               url,
               method: method || DEFAULT_HTTP_METHOD,
