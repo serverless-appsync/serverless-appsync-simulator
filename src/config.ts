@@ -494,7 +494,17 @@ function buildDataSource(
             );
           }
           if (result.FunctionError) {
-            throw new Error(result.FunctionError);
+            const s = result.Payload?.toLocaleString();
+            if (s != null) {
+              const data = JSON.parse(s);
+              throw {
+                // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+                type: `Lambda:${data.errorType}`,
+                message: data.errorMessage,
+              };
+            } else {
+              throw new Error(result.FunctionError);
+            }
           }
           const s = result.Payload?.toLocaleString();
           if (s == null) {
