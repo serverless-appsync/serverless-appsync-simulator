@@ -507,25 +507,20 @@ function buildDataSource(
               `Request failed with status code ${result.StatusCode ?? ''}`,
             );
           }
+          const s = result.Payload?.toLocaleString();
+          const res = s == null || s.length === 0 ? null : JSON.parse(s);
           if (result.FunctionError) {
-            const s = result.Payload?.toLocaleString();
-            if (s != null) {
-              const data = JSON.parse(s);
+            if (res != null) {
               throw {
                 // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-                type: `Lambda:${data.errorType}`,
-                message: data.errorMessage,
+                type: `Lambda:${res.errorType}`,
+                message: res.errorMessage,
               };
             } else {
               throw new Error(result.FunctionError);
             }
           }
-          const s = result.Payload?.toLocaleString();
-          if (s == null) {
-            return null;
-          } else {
-            return JSON.parse(s);
-          }
+          return res;
         },
       };
     }
