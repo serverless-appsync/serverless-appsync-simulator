@@ -79,8 +79,8 @@ class ServerlessAppSyncSimulator {
 
       this.simulators = [];
       if (Array.isArray(this.serverless.service.custom.appSync)) {
-        let port = this.options.port;
-        let wsPort = this.options.wsPort;
+        let port = Number(this.options.port);
+        let wsPort = Number(this.options.wsPort);
         for (let appSyncConfig of this.serverless.service.custom.appSync) {
           this.simulators.push({
             amplifySimulator: await this.startIndividualServer(port, wsPort),
