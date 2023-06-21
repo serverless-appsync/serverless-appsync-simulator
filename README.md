@@ -1,3 +1,18 @@
+Fork "maison" basé sur le fork serverless-appsync/serverless-appsync-simulator#183 (files) afin de permettre la compatibilité serverless-appsync-plugin v2 (apportant le support des resolvers en JS)
+
+### Modifications apportées
+- changement de la dépendance amplify-appsync-siulator, afin d'avoir le support des BatchGetItems via notre fork
+- la possibilité d'avoir plusieurs ApiKey valides (au lieu d'une) pour nos tests de subscriptions (bridgeKey / key)
+
+
+### Mise à jour du projet
+
+
+Bien penser à lancer `npm run build` avant de push les modifs
+
+##  README
+
+
 [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release) ![Release](https://serverless-appsync/serverless-appsync-simulator/workflows/Release/badge.svg) <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-20-orange.svg?style=flat-square)](#contributors-)
 
@@ -119,12 +134,10 @@ Note: Functions should not require hot-reloading, unless you are using a transpi
 This plugin supports _some_ resources resolution from the `Ref`, `Fn::GetAtt` and `Fn::ImportValue` functions
 in your yaml file. It also supports _some_ other Cfn functions such as `Fn::Join`, `Fb::Sub`, etc.
 
-**Note:** Under the hood, this features relies on the [cfn-resolver-lib](https://github.com/robessog/cfn-resolver-lib) package. For more info on supported cfn functions, refer to [the documentation](https://github.com/robessog/cfn-resolver-lib/blob/master/README.md)
 
 ## Basic usage
 
-You can reference resources in your functions' environment variables (that will be accessible from your lambda functions) or datasource definitions.
-The plugin will automatically resolve them for you.
+Le seul changement que nous avons apporté dans ce fork est de changer la version de la dépendance `amplify-appsync-simulator` qui un sous package de `amplify-cli` afin de le remplacer par une version supportant l'opération `BatchGetItem` au sein d'AppSync (Disponible ici : https://github.com/giraudvalentin/amplify-appsync-simulator-with-BatchGetItem)
 
 ```yaml
 provider:
@@ -260,12 +273,11 @@ This plugin supports resolvers implemented by `amplify-appsync-simulator`, as we
 
 **Implemented by this plugin**
 
-- AMAZON_ELASTICSEARCH
+- AMAZON_ELASTIC_SEARCH
 - HTTP
 - RELATIONAL_DATABASE
 
 ## Relational Database
-
 ### Sample VTL for a create mutation
 
 ```
@@ -301,7 +313,6 @@ This plugin supports resolvers implemented by `amplify-appsync-simulator`, as we
 ```
 
 ### Sample VTL for an update mutation
-
 ```
 #set( $update = "" )
 #set( $equals = "=" )
@@ -329,8 +340,8 @@ This plugin supports resolvers implemented by `amplify-appsync-simulator`, as we
 }
 ```
 
-### Sample resolver for delete mutation
 
+### Sample resolver for delete mutation
 ```
 {
   "version": "2018-05-29",
@@ -339,7 +350,6 @@ This plugin supports resolvers implemented by `amplify-appsync-simulator`, as we
 ```
 
 ### Sample mutation response VTL with support for handling AWSDateTime
-
 ```
 #set ( $index = -1)
 #set ( $result = $util.parseJson($ctx.result) )
@@ -376,7 +386,6 @@ $utils.toJson($response)
 ```
 
 ### Using Variable Map
-
 Variable map support is limited and does not differentiate numbers and strings data types, please inject them directly if needed.
 
 Will be escaped properly: `null`, `true`, and `false` values.
@@ -404,30 +413,30 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- markdownlint-disable -->
 <table>
   <tr>
-    <td align="center"><a href="https://twitter.com/Benoit_Boure"><img src="https://avatars0.githubusercontent.com/u/7089997?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Benoît Bouré</b></sub></a><br /><a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=bboure" title="Code">💻</a></td>
-    <td align="center"><a href="http://filip.pyrek.cz/"><img src="https://avatars1.githubusercontent.com/u/6282843?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Filip Pýrek</b></sub></a><br /><a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=FilipPyrek" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/marcoreni"><img src="https://avatars2.githubusercontent.com/u/2797489?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Marco Reni</b></sub></a><br /><a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=marcoreni" title="Code">💻</a></td>
-    <td align="center"><a href="https://egordmitriev.net/"><img src="https://avatars3.githubusercontent.com/u/4254771?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Egor Dmitriev</b></sub></a><br /><a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=EgorDm" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/stschwark"><img src="https://avatars3.githubusercontent.com/u/900253?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Steffen Schwark</b></sub></a><br /><a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=stschwark" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/moelholm"><img src="https://avatars2.githubusercontent.com/u/8393156?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Nicky Moelholm</b></sub></a><br /><a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=moelholm" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/daisuke-awaji"><img src="https://avatars0.githubusercontent.com/u/20736455?v=4?s=100" width="100px;" alt=""/><br /><sub><b>g-awa</b></sub></a><br /><a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=daisuke-awaji" title="Code">💻</a></td>
+    <td align="center"><a href="https://twitter.com/Benoit_Boure"><img src="https://avatars0.githubusercontent.com/u/7089997?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Benoît Bouré</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=bboure" title="Code">💻</a></td>
+    <td align="center"><a href="http://filip.pyrek.cz/"><img src="https://avatars1.githubusercontent.com/u/6282843?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Filip Pýrek</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=FilipPyrek" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/marcoreni"><img src="https://avatars2.githubusercontent.com/u/2797489?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Marco Reni</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=marcoreni" title="Code">💻</a></td>
+    <td align="center"><a href="https://egordmitriev.net/"><img src="https://avatars3.githubusercontent.com/u/4254771?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Egor Dmitriev</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=EgorDm" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/stschwark"><img src="https://avatars3.githubusercontent.com/u/900253?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Steffen Schwark</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=stschwark" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/moelholm"><img src="https://avatars2.githubusercontent.com/u/8393156?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Nicky Moelholm</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=moelholm" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/daisuke-awaji"><img src="https://avatars0.githubusercontent.com/u/20736455?v=4?s=100" width="100px;" alt=""/><br /><sub><b>g-awa</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=daisuke-awaji" title="Code">💻</a></td>
   </tr>
   <tr>
-    <td align="center"><a href="https://github.com/LMulveyCM"><img src="https://avatars0.githubusercontent.com/u/39565663?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Lee Mulvey</b></sub></a><br /><a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=LMulveyCM" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/JimmyHurrah"><img src="https://avatars1.githubusercontent.com/u/6367753?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jimmy Hurrah</b></sub></a><br /><a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=JimmyHurrah" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/LMulveyCM"><img src="https://avatars0.githubusercontent.com/u/39565663?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Lee Mulvey</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=LMulveyCM" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/JimmyHurrah"><img src="https://avatars1.githubusercontent.com/u/6367753?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jimmy Hurrah</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=JimmyHurrah" title="Code">💻</a></td>
     <td align="center"><a href="https://abda.la/"><img src="https://avatars1.githubusercontent.com/u/219340?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Abdala</b></sub></a><br /><a href="#ideas-abdala" title="Ideas, Planning, & Feedback">🤔</a></td>
-    <td align="center"><a href="https://github.com/alexandrusavin"><img src="https://avatars2.githubusercontent.com/u/1612455?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Alexandru Savin</b></sub></a><br /><a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=alexandrusavin" title="Documentation">📖</a></td>
-    <td align="center"><a href="https://github.com/Scale93"><img src="https://avatars.githubusercontent.com/u/36473880?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Scale93</b></sub></a><br /><a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=Scale93" title="Code">💻</a> <a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=Scale93" title="Documentation">📖</a></td>
-    <td align="center"><a href="https://github.com/Liooo"><img src="https://avatars.githubusercontent.com/u/1630378?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ryo Yamada</b></sub></a><br /><a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=Liooo" title="Code">💻</a> <a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=Liooo" title="Documentation">📖</a></td>
-    <td align="center"><a href="https://github.com/h-kishi"><img src="https://avatars.githubusercontent.com/u/8940568?v=4?s=100" width="100px;" alt=""/><br /><sub><b>h-kishi</b></sub></a><br /><a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=h-kishi" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/alexandrusavin"><img src="https://avatars2.githubusercontent.com/u/1612455?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Alexandru Savin</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=alexandrusavin" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/Scale93"><img src="https://avatars.githubusercontent.com/u/36473880?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Scale93</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=Scale93" title="Code">💻</a> <a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=Scale93" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/Liooo"><img src="https://avatars.githubusercontent.com/u/1630378?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ryo Yamada</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=Liooo" title="Code">💻</a> <a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=Liooo" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/h-kishi"><img src="https://avatars.githubusercontent.com/u/8940568?v=4?s=100" width="100px;" alt=""/><br /><sub><b>h-kishi</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=h-kishi" title="Code">💻</a></td>
   </tr>
   <tr>
-    <td align="center"><a href="https://github.com/louislatreille"><img src="https://avatars.githubusercontent.com/u/8052355?v=4?s=100" width="100px;" alt=""/><br /><sub><b>louislatreille</b></sub></a><br /><a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=louislatreille" title="Code">💻</a></td>
-    <td align="center"><a href="http://aleksac.me"><img src="https://avatars.githubusercontent.com/u/25728391?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Aleksa Cukovic</b></sub></a><br /><a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=AleksaC" title="Code">💻</a></td>
-    <td align="center"><a href="https://vanmulligen.ca"><img src="https://avatars.githubusercontent.com/u/16951595?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Sean van Mulligen</b></sub></a><br /><a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=seanvm" title="Code">💻</a></td>
-    <td align="center"><a href="https://github.com/katesclau"><img src="https://avatars.githubusercontent.com/u/5067149?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Diego Rodrigues Ferreira</b></sub></a><br /><a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=katesclau" title="Code">💻</a></td>
-    <td align="center"><a href="https://www.wednesday.is/"><img src="https://avatars.githubusercontent.com/u/4958010?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Mohammed Ali Chherawalla</b></sub></a><br /><a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=alichherawalla" title="Code">💻</a></td>
-    <td align="center"><a href="https://adriantodt.net/"><img src="https://avatars.githubusercontent.com/u/6955035?v=4?s=100" width="100px;" alt=""/><br /><sub><b>AdrianTodt</b></sub></a><br /><a href="https://serverless-appsync/serverless-appsync-simulator/commits?author=adriantodt" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/louislatreille"><img src="https://avatars.githubusercontent.com/u/8052355?v=4?s=100" width="100px;" alt=""/><br /><sub><b>louislatreille</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=louislatreille" title="Code">💻</a></td>
+    <td align="center"><a href="http://aleksac.me"><img src="https://avatars.githubusercontent.com/u/25728391?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Aleksa Cukovic</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=AleksaC" title="Code">💻</a></td>
+    <td align="center"><a href="https://vanmulligen.ca"><img src="https://avatars.githubusercontent.com/u/16951595?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Sean van Mulligen</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=seanvm" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/katesclau"><img src="https://avatars.githubusercontent.com/u/5067149?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Diego Rodrigues Ferreira</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=katesclau" title="Code">💻</a></td>
+    <td align="center"><a href="https://www.wednesday.is/"><img src="https://avatars.githubusercontent.com/u/4958010?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Mohammed Ali Chherawalla</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=alichherawalla" title="Code">💻</a></td>
+    <td align="center"><a href="https://adriantodt.net/"><img src="https://avatars.githubusercontent.com/u/6955035?v=4?s=100" width="100px;" alt=""/><br /><sub><b>AdrianTodt</b></sub></a><br /><a href="https://github.com/bboure/serverless-appsync-simulator/commits?author=adriantodt" title="Code">💻</a></td>
   </tr>
 </table>
 
