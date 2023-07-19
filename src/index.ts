@@ -64,8 +64,8 @@ class ServerlessAppSyncSimulator {
 
   async startServers() {
     try {
-      const appSyncConfig: AppSyncConfigInput =
-        this.serverless.configurationInput.appSync;
+      const appSyncConfig: AppSyncConfigInput = this.serverless
+        .configurationInput.appSync;
       const { config, options, simulator } = await resolveConfiguration(
         this.serverless.service,
         appSyncConfig,
@@ -85,7 +85,7 @@ class ServerlessAppSyncSimulator {
         `${simulator.name} AppSync endpoint: ${simulator.amplifySimulator.url}/graphql`,
       );
       this.log(`${simulator.name} GraphQL: ${simulator.amplifySimulator.url}`);
-    } catch (error: unknown) {
+    } catch (error) {
       this.log(error as string, { color: 'red' });
     }
   }
@@ -143,18 +143,15 @@ class ServerlessAppSyncSimulator {
       }
 
       // init subscription
-      client.command(
-        ['subscribe', watch, 'appsync-simulator', sub],
-        (error) => {
-          if (error) {
-            console.error('Failed to subscribe: ', error);
-            return;
-          }
-        },
-      );
+      client.command(['subscribe', watch, 'appsync-simulator', sub], error => {
+        if (error) {
+          console.error('Failed to subscribe: ', error);
+          return;
+        }
+      });
     });
 
-    client.on('subscription', (resp) => {
+    client.on('subscription', resp => {
       if (resp.subscription === 'appsync-simulator') {
         console.log('Hot-reloading AppSync simulator...');
         this.initServers();
@@ -162,10 +159,15 @@ class ServerlessAppSyncSimulator {
     });
   }
 
-  endServers() {
-    if (this.simulator != null) {
-      this.log('Halting AppSync Simulator');
-      this.simulator.amplifySimulator.stop();
+  async endServers() {
+    try {
+      if (this.simulator != null) {
+        this.log('Halting AppSync Simulator');
+        await this.simulator.amplifySimulator.stop();
+        this.log(`Appsync simulator stopped`);
+      }
+    } catch (error) {
+      this.log(error as string, { color: 'red' });
     }
   }
 }
