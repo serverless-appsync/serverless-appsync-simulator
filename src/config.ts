@@ -279,7 +279,8 @@ export function buildAmplifyConfig(
       .map((r) => buildResolver(r, config, servicePath))
       .filter(nonNullable),
     functions: Object.values(config.pipelineFunctions)
-      .map((f) => buildFunction(f, config, servicePath)),
+      .map((f) => buildFunction(f, config, servicePath))
+      .filter(nonNullable),
     dataSources: Object.values(config.dataSources)
       .map((d) => buildDataSource(d, service, options))
       .filter(nonNullable),
@@ -401,7 +402,7 @@ function buildFunction(
       config,
       servicePath,
     ),
-  };
+  } as unknown as AppSyncSimulatorFunctionsConfig; // Temp fix until amplify-appsync-simulator typings are fixed
 }
 
 function buildMappingTemplate(
