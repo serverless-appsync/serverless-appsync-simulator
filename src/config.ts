@@ -278,7 +278,8 @@ export function buildAmplifyConfig(
     resolvers: Object.values(config.resolvers)
       .map((r) => buildResolver(r, config, servicePath))
       .filter(nonNullable),
-    functions: Object.values(config.pipelineFunctions).map(buildFunction),
+    functions: Object.values(config.pipelineFunctions)
+      .map((f) => buildFunction(f, config, servicePath)),
     dataSources: Object.values(config.dataSources)
       .map((d) => buildDataSource(d, service, options))
       .filter(nonNullable),
@@ -381,13 +382,25 @@ function buildResolver(
 }
 
 function buildFunction(
-  config: DeepResolved<PipelineFunctionConfig>,
+  pipelineFunctionConfig: DeepResolved<PipelineFunctionConfig>,
+  config: Config,
+  servicePath: string,
 ): AppSyncSimulatorFunctionsConfig {
   return {
-    name: config.name,
-    dataSourceName: config.dataSource,
-    requestMappingTemplateLocation: config.request ?? '',
-    responseMappingTemplateLocation: config.response ?? '',
+    name: pipelineFunctionConfig.name,
+    dataSourceName: pipelineFunctionConfig.dataSource,
+    requestMappingTemplate: buildMappingTemplate(
+      pipelineFunctionConfig,
+      'request',
+      config,
+      servicePath,
+    ),
+    responseMappingTemplate: buildMappingTemplate(
+      pipelineFunctionConfig,
+      'response',
+      config,
+      servicePath,
+    ),
   };
 }
 
