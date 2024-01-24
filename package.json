@@ -11,7 +11,7 @@
     "url": "git+https://github.com/serverless-appsync/serverless-appsync-simulator.git"
   },
   "scripts": {
-    "test": "jest",
+    "tests": "jest",
     "build": "tsc -p .",
     "watch": "yarn run build -w",
     "lint": "eslint . && tsc --noEmit",
