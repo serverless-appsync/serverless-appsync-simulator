@@ -63,7 +63,7 @@
     "typescript": "^4.9.5"
   },
   "peerDependencies": {
-    "serverless": "3"
+    "serverless": ">=3.0.0"
   },
   "keywords": [
     "serverless",
