@@ -1,0 +1,127 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`resolveConfiguration should generate a valid config 1`] = `
+{
+  "additionalAuthentications": [
+    {
+      "config": {
+        "userPoolId": "us-west-2_123456789",
+      },
+      "type": "AMAZON_COGNITO_USER_POOLS",
+    },
+  ],
+  "apiKeys": {
+    "foo-bar": {
+      "name": "foo-bar",
+    },
+  },
+  "authentication": {
+    "type": "API_KEY",
+  },
+  "dataSources": {
+    "dynamodb": {
+      "config": {
+        "tableName": "myTable",
+      },
+      "name": "dynamodb",
+      "type": "AMAZON_DYNAMODB",
+    },
+    "http": {
+      "config": {
+        "endpoint": "http://127.0.0.1",
+      },
+      "name": "http",
+      "type": "HTTP",
+    },
+    "lambda": {
+      "config": {
+        "functionName": "resolver",
+      },
+      "name": "lambda",
+      "type": "AWS_LAMBDA",
+    },
+    "none": {
+      "name": "none",
+      "type": "NONE",
+    },
+  },
+  "name": "myAPI",
+  "pipelineFunctions": {
+    "func": {
+      "dataSource": "lambda",
+      "name": "func",
+      "request": "src/__tests__/files/mapping-templates/templates.request.vtl",
+      "response": "src/__tests__/files/mapping-templates/templates.response.vtl",
+      "substitutions": {
+        "mySubVar": "template-function",
+      },
+    },
+    "funcDirect": {
+      "dataSource": "lambda",
+      "name": "funcDirect",
+    },
+  },
+  "resolvers": {
+    "Mutation.updateNode": {
+      "dataSource": "lambda",
+      "field": "updateNode",
+      "kind": "UNIT",
+      "type": "Mutation",
+    },
+    "Query.node": {
+      "dataSource": "lambda",
+      "field": "node",
+      "kind": "UNIT",
+      "type": "Query",
+    },
+    "Query.pipeline": {
+      "field": "pipeline",
+      "functions": [
+        "func",
+        "funcDirect",
+      ],
+      "kind": "PIPELINE",
+      "type": "Query",
+    },
+    "Query.templates": {
+      "dataSource": "lambda",
+      "field": "templates",
+      "kind": "UNIT",
+      "request": "src/__tests__/files/mapping-templates/templates.request.vtl",
+      "response": "src/__tests__/files/mapping-templates/templates.response.vtl",
+      "substitutions": {
+        "mySubVar": "lambda",
+      },
+      "type": "Query",
+    },
+  },
+  "schema": [
+    "src/__tests__/files/*.graphql",
+  ],
+}
+`;
+
+exports[`resolveConfiguration should generate a valid config 2`] = `
+{
+  "apiKey": "0123456789",
+  "dynamoDb": {
+    "accessKeyId": "DEFAULT_ACCESS_KEY",
+    "endpoint": "http://localhost:8000",
+    "region": "localhost",
+    "secretAccessKey": "DEFAULT_SECRET",
+  },
+  "getAttMap": {},
+  "importValueMap": {},
+  "lambdaPort": 3002,
+  "location": ".",
+  "openSearch": {},
+  "port": 20002,
+  "rds": {},
+  "refMap": {},
+  "watch": [
+    "*.graphql",
+    "*.vtl",
+  ],
+  "wsPort": 20003,
+}
+`;

@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "es5",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "strict": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "outDir": "lib",
+    "noImplicitAny": true,
+    "noUncheckedIndexedAccess": true,
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "src/__tests__"]
+}
