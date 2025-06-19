@@ -48,7 +48,7 @@ export default class HttpDataLoader {
     try {
       const { data, status, headers } = await axios.request({
         baseURL: this.config.endpoint,
-        validateStatus: () => false,
+        validateStatus: () => true,
         url: req.resourcePath,
         headers: req.params.headers,
         params: req.params.query,
